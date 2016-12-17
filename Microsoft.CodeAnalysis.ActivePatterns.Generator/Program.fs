@@ -21,6 +21,25 @@ open System
 open System.IO
 open System.Reflection
 
+let syntaxListType =
+    typedefof<Microsoft.CodeAnalysis.SyntaxList<_>>
+let syntaxNodeType = typeof<Microsoft.CodeAnalysis.SyntaxNode>
+let syntaxTokenType = typeof<Microsoft.CodeAnalysis.SyntaxToken>
+
+let (|Value|Token|Node|List|Another|) (t:Type) =
+    if t.IsPrimitive || t.IsEnum || t = typeof<string> then
+        Value t
+    else if syntaxTokenType.IsAssignableFrom t then
+        Token t
+    else if syntaxNodeType.IsAssignableFrom t then
+        Node t
+    else if t.IsGenericType && (t.GetGenericTypeDefinition() = syntaxListType) then
+        List (t.GetGenericArguments().[0])
+    else
+        Another
+let (|NotVisible|_|) (m: MethodBase) =
+    if (m = null) || not m.IsPublic || m.IsStatic then Some m else None
+
 let obsoleteType = typeof<ObsoleteAttribute>
 let isObsoleted (m:MemberInfo) =
     if m.IsDefined obsoleteType then
@@ -28,14 +47,34 @@ let isObsoleted (m:MemberInfo) =
     else
         false
 
-let rec baseAbstractType (t: Type) =
-    let baseType = t.BaseType
-    if not baseType.IsAbstract && t.IsAbstract then
-        t
-    else
-        baseAbstractType baseType
+let targetProperty (p: PropertyInfo) =
+    match p.CanRead, p.GetIndexParameters().Length >= 1, p.GetGetMethod(), isObsoleted p, p.PropertyType with
+    | false, _, _, _, _ -> None
+    | _, true, _, _, _ -> None
+    | _, _, NotVisible _, _, _ -> None
+    | _, _, _, true, _ -> None
+    | _, _, _, _, Value et
+    | _, _, _, _, Token et
+    | _, _, _, _, Node et
+    | _, _, _, _, List et -> Some p
+    | _ -> None
+let getTupleArgs (t: Type) (name: string) =
+      t.GetProperties(BindingFlags.Public ||| BindingFlags.Instance ||| BindingFlags.DeclaredOnly)
+      |> Seq.choose targetProperty
+      |> Seq.toArray
+      |> Seq.choose (fun p ->
+          match p.PropertyType with
+          | Value et
+          | Token et
+          | Node et ->
+              Some (String.Format("{0}.{1}", name, p.Name))
+          | List et ->
+              Some (String.Format("{0}.{1} |> Seq.toList", name, p.Name))
+          | Another ->
+              None)
+      |> Seq.toArray
 
-let generateActivePatterns path (namespaceName: string) (syntaxTypes: Type seq) (nodeName: Type -> string) =
+let generateActivePatternsForValue path (namespaceName: string) (valueTypes: Type seq) (nodeName: Type -> string) =
     use tw = File.CreateText(path)
 
     tw.WriteLine("namespace {0}", namespaceName)
@@ -44,78 +83,60 @@ let generateActivePatterns path (namespaceName: string) (syntaxTypes: Type seq) 
     tw.WriteLine("module ActivePatterns =")
     tw.WriteLine()
 
-    let syntaxListType =
-        typedefof<Microsoft.CodeAnalysis.SyntaxList<_>>
-    let syntaxNodeType = typeof<Microsoft.CodeAnalysis.SyntaxNode>
-    let syntaxTokenType = typeof<Microsoft.CodeAnalysis.SyntaxToken>
-    let (|NodeType|SyntaxList|Another|) (t:Type) =
-        if t.IsPrimitive || t.IsEnum || t = typeof<string> then
-            NodeType t
-        else if syntaxNodeType.IsAssignableFrom t then
-            NodeType t
-        else if syntaxTokenType.IsAssignableFrom t then
-            NodeType t
-        else if t.IsGenericType && (t.GetGenericTypeDefinition() = syntaxListType) then
-            SyntaxList (t.GetGenericArguments().[0])
-        else
-            Another
-    let (|NotVisible|_|) (m: MethodBase) =
-        if (m = null) || not m.IsPublic || m.IsStatic then Some m else None
-    let targetProperty (p: PropertyInfo) =
-        match p.CanRead, p.GetIndexParameters().Length >= 1, p.GetGetMethod(), isObsoleted p, p.PropertyType with
-        | false, _, _, _, _ -> None
-        | _, true, _, _, _ -> None
-        | _, _, NotVisible _, _, _ -> None
-        | _, _, _, true, _ -> None
-        | _, _, _, _, NodeType et
-        | _, _, _, _, SyntaxList et -> Some p
-        | _ -> None
+    valueTypes |> Seq.iter (fun t ->
+        let tupleArgs = getTupleArgs t "value"
+        if not (Array.isEmpty tupleArgs) then
+            tw.WriteLine(
+                "  let (|{0}|) (value:{1}) =",
+                t.Name,
+                nodeName t)
+            tw.WriteLine("    {0} ({1})", t.Name, String.Join(", ", tupleArgs))
+            tw.WriteLine())
+
+    tw.Flush()
+
+let generateActivePatternsForSyntax path (namespaceName: string) (syntaxTypes: Type seq) (nodeName: Type -> string) =
+    use tw = File.CreateText(path)
+
+    tw.WriteLine("namespace {0}", namespaceName)
+    tw.WriteLine()
+    tw.WriteLine("[<AutoOpen>]")
+    tw.WriteLine("module ActivePatterns =")
+    tw.WriteLine()
 
     syntaxTypes |> Seq.iter (fun t ->
-        tw.WriteLine(
-            "  let (|{0}|_|) (node:{1}) =",
-            t.Name,
-            nodeName t)
-        tw.WriteLine("    match node with")
-        tw.WriteLine("    | :? {0} as node ->", t.FullName)
-        let props =
-            t.GetProperties(BindingFlags.Public ||| BindingFlags.Instance ||| BindingFlags.DeclaredOnly)
-            |> Seq.choose targetProperty
-            |> Seq.toArray
-        let tupleArgs =
-            props
-            |> Seq.choose (fun p ->
-                match p.PropertyType with
-                | NodeType et ->
-                    Some (String.Format("node.{0}", p.Name))
-                | SyntaxList et ->
-                    Some (String.Format("node.{0} |> Seq.toList", p.Name))
-                | Another ->
-                    None)
-            |> Seq.toArray
-        tw.WriteLine("      Some ({0})", String.Join(", ", tupleArgs))
-        tw.WriteLine("    | _ -> None")
-        tw.WriteLine())
+        let tupleArgs = getTupleArgs t "node"
+        if not (Array.isEmpty tupleArgs) then
+            tw.WriteLine(
+                "  let (|{0}|_|) (node:{1}) =",
+                t.Name,
+                nodeName t)
+            tw.WriteLine("    match node with")
+            tw.WriteLine("    | :? {0} as node ->", t.FullName)
+            tw.WriteLine("      Some ({0})", String.Join(", ", tupleArgs))
+            tw.WriteLine("    | _ -> None")
+            tw.WriteLine())
 
     tw.Flush()
 
 [<EntryPoint>]
 let main argv =
-    let syntaxTypes (nodeType: Type) =
+    let valueTypes (nodeType: Type) =
         nodeType.Assembly.GetTypes()
         |> Seq.filter (fun t ->
             t.IsPublic &&
             t.IsValueType &&
+            (not t.IsEnum) &&
             (not t.IsGenericType) &&
             (not (isObsoleted t)))
         |> Seq.toArray
 
     let nodeType = typeof<Microsoft.CodeAnalysis.SyntaxNode>
             
-    generateActivePatterns
+    generateActivePatternsForValue
         @"..\..\..\Microsoft.CodeAnalysis.ActivePatterns\ActivePatterns.fs"
         "Microsoft.CodeAnalysis"
-        (syntaxTypes nodeType)
+        (valueTypes nodeType)
         (fun t -> t.FullName)
 
     let syntaxTypes (nodeType: Type) =
@@ -128,15 +149,22 @@ let main argv =
             (not (isObsoleted t)))
         |> Seq.toArray
 
+    let rec baseAbstractType (t: Type) =
+        let baseType = t.BaseType
+        if not baseType.IsAbstract && t.IsAbstract then
+            t
+        else
+            baseAbstractType baseType
+
     let csharpNodeType = typeof<Microsoft.CodeAnalysis.CSharp.CSharpSyntaxNode>
-    generateActivePatterns
+    generateActivePatternsForSyntax
         @"..\..\..\Microsoft.CodeAnalysis.ActivePatterns\CSharpActivePatterns.fs"
         csharpNodeType.Namespace
         (syntaxTypes csharpNodeType)
         (fun t -> (baseAbstractType t).FullName)
 
     let visualBasicNodeType = typeof<Microsoft.CodeAnalysis.VisualBasic.VisualBasicSyntaxNode>
-    generateActivePatterns
+    generateActivePatternsForSyntax
         @"..\..\..\Microsoft.CodeAnalysis.ActivePatterns\VisualBasicActivePatterns.fs"
         visualBasicNodeType.Namespace
         (syntaxTypes visualBasicNodeType)

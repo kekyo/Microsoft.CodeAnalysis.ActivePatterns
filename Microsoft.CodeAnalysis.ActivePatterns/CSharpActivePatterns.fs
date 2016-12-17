@@ -111,12 +111,6 @@ module ActivePatterns =
       Some (node.Left, node.DotToken, node.Right)
     | _ -> None
 
-  let (|SkippedTokensTriviaSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.CSharp.Syntax.SkippedTokensTriviaSyntax as node ->
-      Some ()
-    | _ -> None
-
   let (|TypeArgumentListSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
     match node with
     | :? Microsoft.CodeAnalysis.CSharp.Syntax.TypeArgumentListSyntax as node ->
@@ -997,12 +991,6 @@ module ActivePatterns =
     match node with
     | :? Microsoft.CodeAnalysis.CSharp.Syntax.XmlNameAttributeSyntax as node ->
       Some (node.Name, node.EqualsToken, node.StartQuoteToken, node.Identifier, node.EndQuoteToken)
-    | _ -> None
-
-  let (|XmlTextSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.CSharp.Syntax.XmlTextSyntax as node ->
-      Some ()
     | _ -> None
 
   let (|XmlCDataSectionSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =

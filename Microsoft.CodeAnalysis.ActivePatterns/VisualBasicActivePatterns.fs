@@ -147,12 +147,6 @@ module ActivePatterns =
       Some (node.SubOrFunctionHeader, node.Body)
     | _ -> None
 
-  let (|SkippedTokensTriviaSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.SkippedTokensTriviaSyntax as node ->
-      Some ()
-    | _ -> None
-
   let (|DocumentationCommentTriviaSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
     match node with
     | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.DocumentationCommentTriviaSyntax as node ->
@@ -511,12 +505,6 @@ module ActivePatterns =
     match node with
     | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.WithBlockSyntax as node ->
       Some (node.WithStatement, node.Statements |> Seq.toList, node.EndWithStatement)
-    | _ -> None
-
-  let (|LocalDeclarationStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.LocalDeclarationStatementSyntax as node ->
-      Some ()
     | _ -> None
 
   let (|LabelStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
@@ -1141,12 +1129,6 @@ module ActivePatterns =
     match node with
     | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.XmlElementSyntax as node ->
       Some (node.StartTag, node.Content |> Seq.toList, node.EndTag)
-    | _ -> None
-
-  let (|XmlTextSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.XmlTextSyntax as node ->
-      Some ()
     | _ -> None
 
   let (|XmlElementStartTagSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =

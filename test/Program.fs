@@ -36,12 +36,22 @@ let main argv =
         
     match root with
     | CompilationUnitSyntax
-        (_,
-         [UsingDirectiveSyntax(usingKeyword, _, _, IdentifierNameSyntax(SyntaxToken()), _)],
-         _,
-         members,
+        (_, [ UsingDirectiveSyntax(_, _, _, IdentifierNameSyntax(TextToken("System")), _)], _,
+         [ NamespaceDeclarationSyntax(_,
+            IdentifierNameSyntax(TextToken("SampleNamespace")), _, _, _,
+            [ ClassDeclarationSyntax(decl,
+                _, TextToken("SampleClass"), _, _, _, _,
+                memberDecls,
+                _, _)],
+            _, _) ],
          _) ->
-            Console.WriteLine("{0}", id.Text)
+            memberDecls
+            |> Seq.choose (function
+              | PropertyDeclarationSyntax(_, typeSyntax, _, TextToken(id), _, _, _, _) ->
+                 Some (typeSyntax, id)
+              | _ -> None)
+            |> Seq.iter (printf "%A")
             
     | _ -> ()
     0
+
