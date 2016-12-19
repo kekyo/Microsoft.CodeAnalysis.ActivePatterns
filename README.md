@@ -173,6 +173,10 @@ let main argv =
 ## Platform
 * .NET Framework 4.5
 
+## Additional resources
+* [You will be assimilated. Resistance is futile.](http://www.slideshare.net/kekyo/documents-you-will-be-assimilated-resistance-is-futile)
+  * This is a joke session ;)
+
 ## License
 * Source code copyright (c) 2016 Kouji Matsui
   * Under Apache v2 http://www.apache.org/licenses/LICENSE-2.0
