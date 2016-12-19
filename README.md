@@ -174,7 +174,7 @@ let main argv =
 * .NET Framework 4.5
 
 ## Additional resources
-* [You will be assimilated. Resistance is futile.](http://www.slideshare.net/kekyo/documents-you-will-be-assimilated-resistance-is-futile)
+* ["You will be assimilated. Resistance is futile." - NGK2016B conference (12.17.2016) session slide.](http://www.slideshare.net/kekyo/documents-you-will-be-assimilated-resistance-is-futile)
   * This is a joke session ;)
 
 ## License
