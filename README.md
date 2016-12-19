@@ -170,16 +170,19 @@ let main argv =
 0
 ```
 
-## TODO:
+## Platform
+* .NET Framework 4.5
 
+## License
+* Source code copyright (c) 2016 Kouji Matsui
+  * Under Apache v2 http://www.apache.org/licenses/LICENSE-2.0
+
+## TODO:
 * Improvement auto generator for better output.
 * Add additional custom functions.
 * Support Roslyn 2.0.
-
-## Maintainer
-
-- [Kouji Matsui](https://github.com/kekyo) [twitter](https://twitter.com/kekyo2)
+* Support for F# on .NET Core.
 
 ## History
-
-* 0.5.1: Initial packaged release.
+* 0.5.1:
+  * Initial packaged release.
