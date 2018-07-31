@@ -9,7 +9,7 @@ This library auguments for Roslyn AST (Abstract syntax tree nodes) types by F# a
 
 | Title | Status |
 |:----|:----|
-| NuGet (Roslyn 1.x) | [![NuGet Roslyn 1.x](https://img.shields.io/nuget/v/Microsoft.CodeAnalysis.ActivePatterns.svg?style=flat)](https://www.nuget.org/packages/Microsoft.CodeAnalysis.ActivePatterns) |
+| NuGet | [![NuGet](https://img.shields.io/nuget/v/Microsoft.CodeAnalysis.ActivePatterns.svg?style=flat)](https://www.nuget.org/packages/Microsoft.CodeAnalysis.ActivePatterns) |
 | CI (AppVeyor) | [![AppVeyor](https://img.shields.io/appveyor/ci/kekyo/Microsoft.CodeAnalysis.ActivePatterns/master.svg)](https://ci.appveyor.com/project/kekyo/Microsoft.CodeAnalysis.ActivePatterns) |
 
 ## Code example
@@ -171,22 +171,23 @@ let main argv =
 ```
 
 ## Platform
-* .NET Framework 4.5
+* .NET Standard 1.6/2.0, .NET Core 2.0 and .NET Framework 4.6
+* Roslyn 2 (based 2.8.2).
 
 ## Additional resources
 * ["You will be assimilated. Resistance is futile." - NGK2016B conference (12.17.2016) session slide.](http://www.slideshare.net/kekyo/documents-you-will-be-assimilated-resistance-is-futile)
   * This is a joke session ;)
 
 ## License
-* Source code copyright (c) 2016 Kouji Matsui
+* Source code copyright (c) 2016-2018 Kouji Matsui
   * Under Apache v2 http://www.apache.org/licenses/LICENSE-2.0
 
 ## TODO:
 * Improvement auto generator for better output.
 * Add additional custom functions.
-* Support Roslyn 2.0.
-* Support for F# on .NET Core.
 
 ## History
+* 0.7.1:
+  * Support .NET Standard, .NET Core 2 and F# 4.5 (4.5.2), based Roslyn 2.8.2.
 * 0.5.1:
   * Initial packaged release.

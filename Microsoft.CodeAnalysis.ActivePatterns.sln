@@ -1,15 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Microsoft.CodeAnalysis.ActivePatterns.Generator", "Microsoft.CodeAnalysis.ActivePatterns.Generator\Microsoft.CodeAnalysis.ActivePatterns.Generator.fsproj", "{158409AD-CB76-4ECB-AD20-2A17882A3ADE}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Microsoft.CodeAnalysis.ActivePatterns.Generator", "Microsoft.CodeAnalysis.ActivePatterns.Generator\Microsoft.CodeAnalysis.ActivePatterns.Generator.fsproj", "{158409AD-CB76-4ECB-AD20-2A17882A3ADE}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "test", "test\test.fsproj", "{572C78F9-B4DE-4B63-AED3-A540E897D672}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "test", "test\test.fsproj", "{572C78F9-B4DE-4B63-AED3-A540E897D672}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Microsoft.CodeAnalysis.ActivePatterns", "Microsoft.CodeAnalysis.ActivePatterns\Microsoft.CodeAnalysis.ActivePatterns.fsproj", "{64684914-875D-4B78-86DC-9B7451147138}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Microsoft.CodeAnalysis.ActivePatterns", "Microsoft.CodeAnalysis.ActivePatterns\Microsoft.CodeAnalysis.ActivePatterns.fsproj", "{64684914-875D-4B78-86DC-9B7451147138}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "csharp_sample", "csharp_sample\csharp_sample.csproj", "{42B937E4-331F-4DBC-BC27-873B3281FF93}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D1F9D173-D4A7-4225-A600-32FAB49DA04A}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		build-nupkg.bat = build-nupkg.bat
+		LICENSE.txt = LICENSE.txt
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "csharp_standard_usage_sample", "csharp_standard_usage_sample\csharp_standard_usage_sample.csproj", "{DB46027E-CD1E-4B52-B1DE-4B85BE0C163D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,12 +37,15 @@ Global
 		{64684914-875D-4B78-86DC-9B7451147138}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{64684914-875D-4B78-86DC-9B7451147138}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{64684914-875D-4B78-86DC-9B7451147138}.Release|Any CPU.Build.0 = Release|Any CPU
-		{42B937E4-331F-4DBC-BC27-873B3281FF93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{42B937E4-331F-4DBC-BC27-873B3281FF93}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{42B937E4-331F-4DBC-BC27-873B3281FF93}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{42B937E4-331F-4DBC-BC27-873B3281FF93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB46027E-CD1E-4B52-B1DE-4B85BE0C163D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB46027E-CD1E-4B52-B1DE-4B85BE0C163D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB46027E-CD1E-4B52-B1DE-4B85BE0C163D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB46027E-CD1E-4B52-B1DE-4B85BE0C163D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {29D9D788-5BFA-4DB5-98B6-7D424C5C50AA}
 	EndGlobalSection
 EndGlobal

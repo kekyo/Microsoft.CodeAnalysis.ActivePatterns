@@ -1,7 +1,7 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 //
 // Microsoft.CodeAnalysis.ActivePatterns - F# Active pattern matching library for Roslyn
-// Copyright (c) 2016 Kouji Matsui (@kekyo2)
+// Copyright (c) 2016-2018 Kouji Matsui (@kozy_kekyo)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,26 +17,34 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
+// This code sample is using for this library.
+
+// It goals to clarify why we want to active pattern library.
+// You can compare the "csharp_standard_usage_sample" project (contains C# version).
+
+module test
+
 open System
 open System.IO
 open System.Reflection
 open System.Text
-open Microsoft.CodeAnalysis.CSharp
 open Microsoft.CodeAnalysis
+open Microsoft.CodeAnalysis.CSharp
+open Microsoft.CodeAnalysis.CSharp.Syntax
 
 [<EntryPoint>]
 let main argv =
     let sampleCode =
-        use fs = Assembly.GetEntryAssembly().GetManifestResourceStream "Sample.cs"
+        use fs = Assembly.GetEntryAssembly().GetManifestResourceStream "test.Sample.cs"
         let tr = new StreamReader(fs, Encoding.UTF8)
         tr.ReadToEnd()
 
-    let tree = CSharpSyntaxTree.ParseText sampleCode
-    let root = tree.GetRoot() :?> CSharpSyntaxNode
+    let tree = CSharpSyntaxTree.ParseText sampleCode :?> CSharpSyntaxTree
+    let root = tree.GetRoot()
         
     match root with
     | CompilationUnitSyntax
-        (_, [ UsingDirectiveSyntax(_, _, _, IdentifierNameSyntax(TextToken("System")), _)], _,
+       (_, [ UsingDirectiveSyntax(_, _, _, IdentifierNameSyntax(TextToken("System")), _)], _,
          [ NamespaceDeclarationSyntax(_,
             IdentifierNameSyntax(TextToken("SampleNamespace")), _, _, _,
             [ ClassDeclarationSyntax(decl,

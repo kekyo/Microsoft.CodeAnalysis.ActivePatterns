@@ -1,7 +1,7 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 //
 // Microsoft.CodeAnalysis.ActivePatterns - F# Active pattern matching library for Roslyn
-// Copyright (c) 2016 Kouji Matsui (@kekyo2)
+// Copyright (c) 2016-2018 Kouji Matsui (@kozy_kekyo)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,10 @@
 /////////////////////////////////////////////////////////////////////////////
 
 namespace Microsoft.CodeAnalysis
+
 open Microsoft.CodeAnalysis
+open Microsoft.CodeAnalysis.CSharp
+open Microsoft.CodeAnalysis.VisualBasic
 
 [<AutoOpen>]
 module Additionals =

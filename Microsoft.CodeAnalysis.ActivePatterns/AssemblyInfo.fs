@@ -1,7 +1,7 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 //
 // Microsoft.CodeAnalysis.ActivePatterns - F# Active pattern matching library for Roslyn
-// Copyright (c) 2016 Kouji Matsui (@kekyo2)
+// Copyright (c) 2016-2018 Kouji Matsui (@kozy_kekyo)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,20 +22,7 @@ namespace global
 open System.Reflection
 open System.Runtime.InteropServices
 
-[<assembly: AssemblyTitle("Microsoft.CodeAnalysis.ActivePatterns")>]
-[<assembly: AssemblyDescription("F# Active pattern matching library for Roslyn")>]
-[<assembly: AssemblyCompany("Kouji Matsui")>]
-[<assembly: AssemblyProduct("Microsoft.CodeAnalysis.ActivePatterns")>]
-[<assembly: AssemblyCopyright("Copyright (c) 2016 Kouji Matsui")>]
-[<assembly: AssemblyTrademark("Microsoft.CodeAnalysis.ActivePatterns")>]
-
 [<assembly: ComVisible(false)>]
 [<assembly: Guid("158409ad-cb76-4ecb-ad20-2a17882a3ade")>]
-
-#if DEBUG
-[<assembly: AssemblyConfiguration("DEBUG")>]
-#else
-[<assembly: AssemblyConfiguration("RELEASE")>]
-#endif
 
 do()

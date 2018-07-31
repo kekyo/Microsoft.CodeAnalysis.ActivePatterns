@@ -54,9 +54,6 @@ module ActivePatterns =
   let (|SyntaxTriviaList|) (value:Microsoft.CodeAnalysis.SyntaxTriviaList) =
     SyntaxTriviaList (value.Count)
 
-  let (|SemanticEdit|) (value:Microsoft.CodeAnalysis.Emit.SemanticEdit) =
-    SemanticEdit (value.Kind, value.PreserveLocalVariables)
-
   let (|LinePosition|) (value:Microsoft.CodeAnalysis.Text.LinePosition) =
     LinePosition (value.Line, value.Character)
 
@@ -77,4 +74,10 @@ module ActivePatterns =
 
   let (|SyntaxNodeAnalysisContext|) (value:Microsoft.CodeAnalysis.Diagnostics.SyntaxNodeAnalysisContext) =
     SyntaxNodeAnalysisContext (value.Node)
+
+  let (|CommonConversion|) (value:Microsoft.CodeAnalysis.Operations.CommonConversion) =
+    CommonConversion (value.Exists, value.IsIdentity, value.IsNumeric, value.IsReference, value.IsUserDefined)
+
+  let (|SemanticEdit|) (value:Microsoft.CodeAnalysis.Emit.SemanticEdit) =
+    SemanticEdit (value.Kind, value.PreserveLocalVariables)
 

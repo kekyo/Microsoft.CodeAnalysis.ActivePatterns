@@ -1,7 +1,7 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 //
 // Microsoft.CodeAnalysis.ActivePatterns - F# Active pattern matching library for Roslyn
-// Copyright (c) 2016 Kouji Matsui (@kekyo2)
+// Copyright (c) 2016-2018 Kouji Matsui (@kozy_kekyo)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 // limitations under the License.
 //
 /////////////////////////////////////////////////////////////////////////////
+
+module Generator
 
 open System
 open System.IO
@@ -119,6 +121,9 @@ let generateActivePatternsForSyntax path (namespaceName: string) (syntaxTypes: T
 
     tw.Flush()
 
+let getTargetPath fileName =
+    (Path.Combine("..","..","..","..","Microsoft.CodeAnalysis.ActivePatterns",fileName))
+
 [<EntryPoint>]
 let main argv =
     let valueTypes (nodeType: Type) =
@@ -134,7 +139,7 @@ let main argv =
     let nodeType = typeof<Microsoft.CodeAnalysis.SyntaxNode>
             
     generateActivePatternsForValue
-        @"..\..\..\Microsoft.CodeAnalysis.ActivePatterns\ActivePatterns.fs"
+        (getTargetPath "ActivePatterns.fs")
         "Microsoft.CodeAnalysis"
         (valueTypes nodeType)
         (fun t -> t.FullName)
@@ -158,14 +163,14 @@ let main argv =
 
     let csharpNodeType = typeof<Microsoft.CodeAnalysis.CSharp.CSharpSyntaxNode>
     generateActivePatternsForSyntax
-        @"..\..\..\Microsoft.CodeAnalysis.ActivePatterns\CSharpActivePatterns.fs"
+        (getTargetPath "CSharpActivePatterns.fs")
         csharpNodeType.Namespace
         (syntaxTypes csharpNodeType)
         (fun t -> (baseAbstractType t).FullName)
 
     let visualBasicNodeType = typeof<Microsoft.CodeAnalysis.VisualBasic.VisualBasicSyntaxNode>
     generateActivePatternsForSyntax
-        @"..\..\..\Microsoft.CodeAnalysis.ActivePatterns\VisualBasicActivePatterns.fs"
+        (getTargetPath "VisualBasicActivePatterns.fs")
         visualBasicNodeType.Namespace
         (syntaxTypes visualBasicNodeType)
         (fun t -> (baseAbstractType t).FullName)

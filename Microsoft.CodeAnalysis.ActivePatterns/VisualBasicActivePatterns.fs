@@ -3,204 +3,6 @@ namespace Microsoft.CodeAnalysis.VisualBasic
 [<AutoOpen>]
 module ActivePatterns =
 
-  let (|SimpleArgumentSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.SimpleArgumentSyntax as node ->
-      Some (node.IsNamed, node.NameColonEquals, node.Expression)
-    | _ -> None
-
-  let (|OmittedArgumentSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.OmittedArgumentSyntax as node ->
-      Some (node.IsNamed, node.Empty)
-    | _ -> None
-
-  let (|RangeArgumentSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.RangeArgumentSyntax as node ->
-      Some (node.IsNamed, node.LowerBound, node.ToKeyword, node.UpperBound)
-    | _ -> None
-
-  let (|ArrayRankSpecifierSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.ArrayRankSpecifierSyntax as node ->
-      Some (node.Rank, node.OpenParenToken, node.CloseParenToken)
-    | _ -> None
-
-  let (|CaseBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.CaseBlockSyntax as node ->
-      Some (node.CaseStatement, node.Statements |> Seq.toList)
-    | _ -> None
-
-  let (|CompilationUnitSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.CompilationUnitSyntax as node ->
-      Some (node.Options |> Seq.toList, node.Imports |> Seq.toList, node.Attributes |> Seq.toList, node.Members |> Seq.toList, node.EndOfFileToken)
-    | _ -> None
-
-  let (|CrefOperatorReferenceSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.CrefOperatorReferenceSyntax as node ->
-      Some (node.OperatorKeyword, node.OperatorToken)
-    | _ -> None
-
-  let (|ForBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.ForBlockSyntax as node ->
-      Some (node.ForOrForEachStatement, node.ForStatement, node.Statements |> Seq.toList, node.NextStatement)
-    | _ -> None
-
-  let (|ForEachBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.ForEachBlockSyntax as node ->
-      Some (node.ForOrForEachStatement, node.ForEachStatement, node.Statements |> Seq.toList, node.NextStatement)
-    | _ -> None
-
-  let (|MethodStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.MethodStatementSyntax as node ->
-      Some (node.DeclarationKeyword, node.AttributeLists |> Seq.toList, node.SubOrFunctionKeyword, node.Identifier, node.TypeParameterList, node.ParameterList, node.AsClause, node.HandlesClause, node.ImplementsClause)
-    | _ -> None
-
-  let (|DelegateStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.DelegateStatementSyntax as node ->
-      Some (node.DeclarationKeyword, node.AttributeLists |> Seq.toList, node.DelegateKeyword, node.SubOrFunctionKeyword, node.Identifier, node.TypeParameterList, node.ParameterList, node.AsClause)
-    | _ -> None
-
-  let (|DeclareStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.DeclareStatementSyntax as node ->
-      Some (node.DeclarationKeyword, node.AttributeLists |> Seq.toList, node.DeclareKeyword, node.CharsetKeyword, node.SubOrFunctionKeyword, node.Identifier, node.LibKeyword, node.LibraryName, node.AliasKeyword, node.AliasName, node.ParameterList, node.AsClause)
-    | _ -> None
-
-  let (|LambdaHeaderSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.LambdaHeaderSyntax as node ->
-      Some (node.DeclarationKeyword, node.AttributeLists |> Seq.toList, node.SubOrFunctionKeyword, node.ParameterList, node.AsClause)
-    | _ -> None
-
-  let (|SubNewStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.SubNewStatementSyntax as node ->
-      Some (node.DeclarationKeyword, node.AttributeLists |> Seq.toList, node.SubKeyword, node.NewKeyword, node.ParameterList)
-    | _ -> None
-
-  let (|EventStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.EventStatementSyntax as node ->
-      Some (node.DeclarationKeyword, node.AttributeLists |> Seq.toList, node.CustomKeyword, node.EventKeyword, node.Identifier, node.ParameterList, node.AsClause, node.ImplementsClause)
-    | _ -> None
-
-  let (|PropertyStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.PropertyStatementSyntax as node ->
-      Some (node.DeclarationKeyword, node.AttributeLists |> Seq.toList, node.PropertyKeyword, node.Identifier, node.ParameterList, node.AsClause, node.Initializer, node.ImplementsClause)
-    | _ -> None
-
-  let (|OperatorStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.OperatorStatementSyntax as node ->
-      Some (node.DeclarationKeyword, node.AttributeLists |> Seq.toList, node.OperatorKeyword, node.OperatorToken, node.ParameterList, node.AsClause)
-    | _ -> None
-
-  let (|AccessorStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.AccessorStatementSyntax as node ->
-      Some (node.DeclarationKeyword, node.AttributeLists |> Seq.toList, node.AccessorKeyword, node.ParameterList)
-    | _ -> None
-
-  let (|AccessorBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.AccessorBlockSyntax as node ->
-      Some (node.BlockStatement, node.EndBlockStatement, node.AccessorStatement, node.Statements |> Seq.toList, node.EndAccessorStatement)
-    | _ -> None
-
-  let (|ConstructorBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.ConstructorBlockSyntax as node ->
-      Some (node.BlockStatement, node.EndBlockStatement, node.SubNewStatement, node.Statements |> Seq.toList, node.EndSubStatement)
-    | _ -> None
-
-  let (|MethodBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.MethodBlockSyntax as node ->
-      Some (node.BlockStatement, node.EndBlockStatement, node.SubOrFunctionStatement, node.Statements |> Seq.toList, node.EndSubOrFunctionStatement)
-    | _ -> None
-
-  let (|OperatorBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.OperatorBlockSyntax as node ->
-      Some (node.BlockStatement, node.EndBlockStatement, node.OperatorStatement, node.Statements |> Seq.toList, node.EndOperatorStatement)
-    | _ -> None
-
-  let (|MultiLineLambdaExpressionSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.MultiLineLambdaExpressionSyntax as node ->
-      Some (node.SubOrFunctionHeader, node.Statements |> Seq.toList, node.EndSubOrFunctionStatement)
-    | _ -> None
-
-  let (|SingleLineLambdaExpressionSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.SingleLineLambdaExpressionSyntax as node ->
-      Some (node.SubOrFunctionHeader, node.Body)
-    | _ -> None
-
-  let (|DocumentationCommentTriviaSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.DocumentationCommentTriviaSyntax as node ->
-      Some (node.Content |> Seq.toList)
-    | _ -> None
-
-  let (|ClassBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.ClassBlockSyntax as node ->
-      Some (node.BlockStatement, node.EndBlockStatement, node.ClassStatement, node.Inherits |> Seq.toList, node.Implements |> Seq.toList, node.Members |> Seq.toList, node.EndClassStatement)
-    | _ -> None
-
-  let (|StructureBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.StructureBlockSyntax as node ->
-      Some (node.BlockStatement, node.EndBlockStatement, node.StructureStatement, node.Inherits |> Seq.toList, node.Implements |> Seq.toList, node.Members |> Seq.toList, node.EndStructureStatement)
-    | _ -> None
-
-  let (|InterfaceBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.InterfaceBlockSyntax as node ->
-      Some (node.BlockStatement, node.EndBlockStatement, node.InterfaceStatement, node.Inherits |> Seq.toList, node.Implements |> Seq.toList, node.Members |> Seq.toList, node.EndInterfaceStatement)
-    | _ -> None
-
-  let (|ModuleBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.ModuleBlockSyntax as node ->
-      Some (node.BlockStatement, node.EndBlockStatement, node.ModuleStatement, node.Inherits |> Seq.toList, node.Implements |> Seq.toList, node.Members |> Seq.toList, node.EndModuleStatement)
-    | _ -> None
-
-  let (|ModuleStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.ModuleStatementSyntax as node ->
-      Some (node.DeclarationKeyword, node.AttributeLists |> Seq.toList, node.ModuleKeyword, node.Identifier, node.TypeParameterList)
-    | _ -> None
-
-  let (|StructureStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.StructureStatementSyntax as node ->
-      Some (node.DeclarationKeyword, node.AttributeLists |> Seq.toList, node.StructureKeyword, node.Identifier, node.TypeParameterList)
-    | _ -> None
-
-  let (|ClassStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.ClassStatementSyntax as node ->
-      Some (node.DeclarationKeyword, node.AttributeLists |> Seq.toList, node.ClassKeyword, node.Identifier, node.TypeParameterList)
-    | _ -> None
-
-  let (|InterfaceStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.InterfaceStatementSyntax as node ->
-      Some (node.DeclarationKeyword, node.AttributeLists |> Seq.toList, node.InterfaceKeyword, node.Identifier, node.TypeParameterList)
-    | _ -> None
-
   let (|EmptyStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
     match node with
     | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.EmptyStatementSyntax as node ->
@@ -211,6 +13,12 @@ module ActivePatterns =
     match node with
     | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.EndBlockStatementSyntax as node ->
       Some (node.EndKeyword, node.BlockKeyword)
+    | _ -> None
+
+  let (|CompilationUnitSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.CompilationUnitSyntax as node ->
+      Some (node.Options |> Seq.toList, node.Imports |> Seq.toList, node.Attributes |> Seq.toList, node.Members |> Seq.toList, node.EndOfFileToken)
     | _ -> None
 
   let (|OptionStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
@@ -255,6 +63,30 @@ module ActivePatterns =
       Some (node.NamespaceKeyword, node.Name)
     | _ -> None
 
+  let (|ModuleBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.ModuleBlockSyntax as node ->
+      Some (node.ModuleStatement, node.Inherits |> Seq.toList, node.Implements |> Seq.toList, node.Members |> Seq.toList, node.EndModuleStatement, node.BlockStatement, node.EndBlockStatement)
+    | _ -> None
+
+  let (|StructureBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.StructureBlockSyntax as node ->
+      Some (node.StructureStatement, node.Inherits |> Seq.toList, node.Implements |> Seq.toList, node.Members |> Seq.toList, node.EndStructureStatement, node.BlockStatement, node.EndBlockStatement)
+    | _ -> None
+
+  let (|InterfaceBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.InterfaceBlockSyntax as node ->
+      Some (node.InterfaceStatement, node.Inherits |> Seq.toList, node.Implements |> Seq.toList, node.Members |> Seq.toList, node.EndInterfaceStatement, node.BlockStatement, node.EndBlockStatement)
+    | _ -> None
+
+  let (|ClassBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.ClassBlockSyntax as node ->
+      Some (node.ClassStatement, node.Inherits |> Seq.toList, node.Implements |> Seq.toList, node.Members |> Seq.toList, node.EndClassStatement, node.BlockStatement, node.EndBlockStatement)
+    | _ -> None
+
   let (|EnumBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
     match node with
     | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.EnumBlockSyntax as node ->
@@ -271,6 +103,30 @@ module ActivePatterns =
     match node with
     | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.ImplementsStatementSyntax as node ->
       Some (node.ImplementsKeyword)
+    | _ -> None
+
+  let (|ModuleStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.ModuleStatementSyntax as node ->
+      Some (node.AttributeLists |> Seq.toList, node.ModuleKeyword, node.Identifier, node.TypeParameterList, node.DeclarationKeyword)
+    | _ -> None
+
+  let (|StructureStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.StructureStatementSyntax as node ->
+      Some (node.AttributeLists |> Seq.toList, node.StructureKeyword, node.Identifier, node.TypeParameterList, node.DeclarationKeyword)
+    | _ -> None
+
+  let (|InterfaceStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.InterfaceStatementSyntax as node ->
+      Some (node.AttributeLists |> Seq.toList, node.InterfaceKeyword, node.Identifier, node.TypeParameterList, node.DeclarationKeyword)
+    | _ -> None
+
+  let (|ClassStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.ClassStatementSyntax as node ->
+      Some (node.AttributeLists |> Seq.toList, node.ClassKeyword, node.Identifier, node.TypeParameterList, node.DeclarationKeyword)
     | _ -> None
 
   let (|EnumStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
@@ -321,6 +177,30 @@ module ActivePatterns =
       Some (node.AttributeLists |> Seq.toList, node.Identifier, node.Initializer)
     | _ -> None
 
+  let (|MethodBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.MethodBlockSyntax as node ->
+      Some (node.SubOrFunctionStatement, node.Statements |> Seq.toList, node.EndSubOrFunctionStatement, node.BlockStatement, node.EndBlockStatement)
+    | _ -> None
+
+  let (|ConstructorBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.ConstructorBlockSyntax as node ->
+      Some (node.SubNewStatement, node.Statements |> Seq.toList, node.EndSubStatement, node.BlockStatement, node.EndBlockStatement)
+    | _ -> None
+
+  let (|OperatorBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.OperatorBlockSyntax as node ->
+      Some (node.OperatorStatement, node.Statements |> Seq.toList, node.EndOperatorStatement, node.BlockStatement, node.EndBlockStatement)
+    | _ -> None
+
+  let (|AccessorBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.AccessorBlockSyntax as node ->
+      Some (node.AccessorStatement, node.Statements |> Seq.toList, node.EndAccessorStatement, node.BlockStatement, node.EndBlockStatement)
+    | _ -> None
+
   let (|PropertyBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
     match node with
     | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.PropertyBlockSyntax as node ->
@@ -337,6 +217,54 @@ module ActivePatterns =
     match node with
     | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.ParameterListSyntax as node ->
       Some (node.OpenParenToken, node.CloseParenToken)
+    | _ -> None
+
+  let (|MethodStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.MethodStatementSyntax as node ->
+      Some (node.AttributeLists |> Seq.toList, node.SubOrFunctionKeyword, node.Identifier, node.TypeParameterList, node.ParameterList, node.AsClause, node.HandlesClause, node.ImplementsClause, node.DeclarationKeyword)
+    | _ -> None
+
+  let (|SubNewStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.SubNewStatementSyntax as node ->
+      Some (node.AttributeLists |> Seq.toList, node.SubKeyword, node.NewKeyword, node.ParameterList, node.DeclarationKeyword)
+    | _ -> None
+
+  let (|DeclareStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.DeclareStatementSyntax as node ->
+      Some (node.AttributeLists |> Seq.toList, node.DeclareKeyword, node.CharsetKeyword, node.SubOrFunctionKeyword, node.Identifier, node.LibKeyword, node.LibraryName, node.AliasKeyword, node.AliasName, node.ParameterList, node.AsClause, node.DeclarationKeyword)
+    | _ -> None
+
+  let (|DelegateStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.DelegateStatementSyntax as node ->
+      Some (node.AttributeLists |> Seq.toList, node.DelegateKeyword, node.SubOrFunctionKeyword, node.Identifier, node.TypeParameterList, node.ParameterList, node.AsClause, node.DeclarationKeyword)
+    | _ -> None
+
+  let (|EventStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.EventStatementSyntax as node ->
+      Some (node.AttributeLists |> Seq.toList, node.CustomKeyword, node.EventKeyword, node.Identifier, node.ParameterList, node.AsClause, node.ImplementsClause, node.DeclarationKeyword)
+    | _ -> None
+
+  let (|OperatorStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.OperatorStatementSyntax as node ->
+      Some (node.AttributeLists |> Seq.toList, node.OperatorKeyword, node.OperatorToken, node.ParameterList, node.AsClause, node.DeclarationKeyword)
+    | _ -> None
+
+  let (|PropertyStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.PropertyStatementSyntax as node ->
+      Some (node.AttributeLists |> Seq.toList, node.PropertyKeyword, node.Identifier, node.ParameterList, node.AsClause, node.Initializer, node.ImplementsClause, node.DeclarationKeyword)
+    | _ -> None
+
+  let (|AccessorStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.AccessorStatementSyntax as node ->
+      Some (node.AttributeLists |> Seq.toList, node.AccessorKeyword, node.ParameterList, node.DeclarationKeyword)
     | _ -> None
 
   let (|ImplementsClauseSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
@@ -445,6 +373,12 @@ module ActivePatterns =
     match node with
     | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.ModifiedIdentifierSyntax as node ->
       Some (node.Identifier, node.Nullable, node.ArrayBounds, node.ArrayRankSpecifiers |> Seq.toList)
+    | _ -> None
+
+  let (|ArrayRankSpecifierSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.ArrayRankSpecifierSyntax as node ->
+      Some (node.OpenParenToken, node.CloseParenToken, node.Rank)
     | _ -> None
 
   let (|AttributeListSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
@@ -675,6 +609,12 @@ module ActivePatterns =
       Some (node.SelectKeyword, node.CaseKeyword, node.Expression)
     | _ -> None
 
+  let (|CaseBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.CaseBlockSyntax as node ->
+      Some (node.CaseStatement, node.Statements |> Seq.toList)
+    | _ -> None
+
   let (|CaseStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
     match node with
     | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.CaseStatementSyntax as node ->
@@ -739,6 +679,18 @@ module ActivePatterns =
     match node with
     | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.WhileStatementSyntax as node ->
       Some (node.WhileKeyword, node.Condition)
+    | _ -> None
+
+  let (|ForBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.ForBlockSyntax as node ->
+      Some (node.ForStatement, node.Statements |> Seq.toList, node.NextStatement, node.ForOrForEachStatement)
+    | _ -> None
+
+  let (|ForEachBlockSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.ForEachBlockSyntax as node ->
+      Some (node.ForEachStatement, node.Statements |> Seq.toList, node.NextStatement, node.ForOrForEachStatement)
     | _ -> None
 
   let (|ForStatementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
@@ -841,6 +793,30 @@ module ActivePatterns =
     match node with
     | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.ParenthesizedExpressionSyntax as node ->
       Some (node.OpenParenToken, node.Expression, node.CloseParenToken)
+    | _ -> None
+
+  let (|TupleExpressionSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.TupleExpressionSyntax as node ->
+      Some (node.OpenParenToken, node.CloseParenToken)
+    | _ -> None
+
+  let (|TupleTypeSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.TupleTypeSyntax as node ->
+      Some (node.OpenParenToken, node.CloseParenToken)
+    | _ -> None
+
+  let (|TypedTupleElementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.TypedTupleElementSyntax as node ->
+      Some (node.Type)
+    | _ -> None
+
+  let (|NamedTupleElementSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.NamedTupleElementSyntax as node ->
+      Some (node.Identifier, node.AsClause)
     | _ -> None
 
   let (|MeExpressionSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
@@ -969,16 +945,52 @@ module ActivePatterns =
       Some (node.IfKeyword, node.OpenParenToken, node.Condition, node.FirstCommaToken, node.WhenTrue, node.SecondCommaToken, node.WhenFalse, node.CloseParenToken)
     | _ -> None
 
+  let (|SingleLineLambdaExpressionSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.SingleLineLambdaExpressionSyntax as node ->
+      Some (node.SubOrFunctionHeader, node.Body)
+    | _ -> None
+
+  let (|MultiLineLambdaExpressionSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.MultiLineLambdaExpressionSyntax as node ->
+      Some (node.SubOrFunctionHeader, node.Statements |> Seq.toList, node.EndSubOrFunctionStatement)
+    | _ -> None
+
+  let (|LambdaHeaderSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.LambdaHeaderSyntax as node ->
+      Some (node.AttributeLists |> Seq.toList, node.SubOrFunctionKeyword, node.ParameterList, node.AsClause, node.DeclarationKeyword)
+    | _ -> None
+
   let (|ArgumentListSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
     match node with
     | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.ArgumentListSyntax as node ->
       Some (node.OpenParenToken, node.CloseParenToken)
     | _ -> None
 
+  let (|OmittedArgumentSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.OmittedArgumentSyntax as node ->
+      Some (node.Empty, node.IsNamed)
+    | _ -> None
+
+  let (|SimpleArgumentSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.SimpleArgumentSyntax as node ->
+      Some (node.NameColonEquals, node.Expression, node.IsNamed)
+    | _ -> None
+
   let (|NameColonEqualsSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
     match node with
     | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.NameColonEqualsSyntax as node ->
       Some (node.Name, node.ColonEqualsToken)
+    | _ -> None
+
+  let (|RangeArgumentSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.RangeArgumentSyntax as node ->
+      Some (node.LowerBound, node.ToKeyword, node.UpperBound, node.IsNamed)
     | _ -> None
 
   let (|QueryExpressionSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
@@ -1275,6 +1287,12 @@ module ActivePatterns =
       Some (node.Modifier, node.Type)
     | _ -> None
 
+  let (|CrefOperatorReferenceSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.CrefOperatorReferenceSyntax as node ->
+      Some (node.OperatorKeyword, node.OperatorToken)
+    | _ -> None
+
   let (|QualifiedCrefOperatorReferenceSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
     match node with
     | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.QualifiedCrefOperatorReferenceSyntax as node ->
@@ -1291,6 +1309,12 @@ module ActivePatterns =
     match node with
     | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.AwaitExpressionSyntax as node ->
       Some (node.AwaitKeyword, node.Expression)
+    | _ -> None
+
+  let (|DocumentationCommentTriviaSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
+    match node with
+    | :? Microsoft.CodeAnalysis.VisualBasic.Syntax.DocumentationCommentTriviaSyntax as node ->
+      Some (node.Content |> Seq.toList)
     | _ -> None
 
   let (|XmlCrefAttributeSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
