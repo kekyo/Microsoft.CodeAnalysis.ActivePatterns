@@ -1,4 +1,4 @@
-# F# Active pattern functions for Roslyn Compiler Platform
+# F# Active pattern library for Roslyn Compiler Platform (C#, VB)
 
 "Microsoft.CodeAnalysis.ActivePatterns" is a F#'s active pattern functions library for [The .NET Compiler Platform ("Roslyn")](https://github.com/dotnet/roslyn) compiler platform.
 This library auguments for Roslyn AST (Abstract syntax tree nodes) types by F# active pattern functions.
