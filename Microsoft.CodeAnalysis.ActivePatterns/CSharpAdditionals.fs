@@ -17,10 +17,21 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-namespace Microsoft.CodeAnalysis
+namespace Microsoft.CodeAnalysis.CSharp
+
+open Microsoft.CodeAnalysis
+open Microsoft.CodeAnalysis.CSharp
 
 [<AutoOpen>]
-module Additionals =
+module CSharpAdditionals =
 
-  let (|TextToken|) (value:Microsoft.CodeAnalysis.SyntaxToken) =
-    TextToken (value.Text)
+  let (|IdentifierName|_|) node : string list option =
+    let rec matcher (node:Microsoft.CodeAnalysis.CSharp.CSharpSyntaxNode) =
+        match node with
+        | CSharpActivePatterns.IdentifierNameSyntax(TextToken(text)) ->
+            Some [ text ]
+        | CSharpActivePatterns.QualifiedNameSyntax(left, _, right) ->
+            matcher left |> Option.bind(fun left -> matcher right |> Option.bind(fun right -> Some (List.append left right)))
+        | _ ->
+            None
+    matcher node

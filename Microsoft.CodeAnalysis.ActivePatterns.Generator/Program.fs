@@ -97,13 +97,13 @@ let generateActivePatternsForValue path (namespaceName: string) (valueTypes: Typ
 
     tw.Flush()
 
-let generateActivePatternsForSyntax path (namespaceName: string) (syntaxTypes: Type seq) (nodeName: Type -> string) =
+let generateActivePatternsForSyntax path (namespaceName: string) (moduleName: string) (syntaxTypes: Type seq) (nodeName: Type -> string) =
     use tw = File.CreateText(path)
 
     tw.WriteLine("namespace {0}", namespaceName)
     tw.WriteLine()
     tw.WriteLine("[<AutoOpen>]")
-    tw.WriteLine("module ActivePatterns =")
+    tw.WriteLine("module {0} =", moduleName)
     tw.WriteLine()
 
     syntaxTypes |> Seq.iter (fun t ->
@@ -121,8 +121,11 @@ let generateActivePatternsForSyntax path (namespaceName: string) (syntaxTypes: T
 
     tw.Flush()
 
-let getTargetPath fileName =
-    (Path.Combine("..","..","..","..","Microsoft.CodeAnalysis.ActivePatterns",fileName))
+let getTargetPath (prefix: string) fileName =
+    if prefix.Length >= 1 then
+        (Path.Combine("..","..","..","..", "Microsoft.CodeAnalysis.ActivePatterns", prefix, fileName))
+    else
+        (Path.Combine("..","..","..","..", "Microsoft.CodeAnalysis.ActivePatterns", fileName))
 
 [<EntryPoint>]
 let main argv =
@@ -139,7 +142,7 @@ let main argv =
     let nodeType = typeof<Microsoft.CodeAnalysis.SyntaxNode>
             
     generateActivePatternsForValue
-        (getTargetPath "ActivePatterns.fs")
+        (getTargetPath "" "ActivePatterns.fs")
         "Microsoft.CodeAnalysis"
         (valueTypes nodeType)
         (fun t -> t.FullName)
@@ -154,25 +157,43 @@ let main argv =
             (not (isObsoleted t)))
         |> Seq.toArray
 
-    let rec baseAbstractType (t: Type) =
-        let baseType = t.BaseType
-        if not baseType.IsAbstract && t.IsAbstract then
+    let rec baseAbstractType (bottomType: Type) (t: Type) =
+        if t = bottomType then
             t
         else
-            baseAbstractType baseType
+            let baseType = t.BaseType
+            if not baseType.IsAbstract && t.IsAbstract then
+                t
+            else
+                baseAbstractType bottomType baseType
+    let objType = typeof<obj>
 
     let csharpNodeType = typeof<Microsoft.CodeAnalysis.CSharp.CSharpSyntaxNode>
     generateActivePatternsForSyntax
-        (getTargetPath "CSharpActivePatterns.fs")
-        csharpNodeType.Namespace
+        (getTargetPath "Raw" "CSharpActivePatterns.fs")
+        (csharpNodeType.Namespace + ".Raw")
+        "CSharpActivePatterns"
         (syntaxTypes csharpNodeType)
-        (fun t -> (baseAbstractType t).FullName)
+        (fun t -> (baseAbstractType objType t).FullName)
+    generateActivePatternsForSyntax
+        (getTargetPath "" "CSharpActivePatterns.fs")
+        csharpNodeType.Namespace
+        "CSharpActivePatterns"
+        (syntaxTypes csharpNodeType)
+        (fun t -> (baseAbstractType csharpNodeType t).FullName)
 
     let visualBasicNodeType = typeof<Microsoft.CodeAnalysis.VisualBasic.VisualBasicSyntaxNode>
     generateActivePatternsForSyntax
-        (getTargetPath "VisualBasicActivePatterns.fs")
-        visualBasicNodeType.Namespace
+        (getTargetPath "Raw" "VisualBasicActivePatterns.fs")
+        (visualBasicNodeType.Namespace + ".Raw")
+        "VisualBasicActivePatterns"
         (syntaxTypes visualBasicNodeType)
-        (fun t -> (baseAbstractType t).FullName)
+        (fun t -> (baseAbstractType objType t).FullName)
+    generateActivePatternsForSyntax
+        (getTargetPath "" "VisualBasicActivePatterns.fs")
+        visualBasicNodeType.Namespace
+        "VisualBasicActivePatterns"
+        (syntaxTypes visualBasicNodeType)
+        (fun t -> (baseAbstractType visualBasicNodeType t).FullName)
 
     0

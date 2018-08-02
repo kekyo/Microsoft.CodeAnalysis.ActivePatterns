@@ -17,11 +17,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Raw" />
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="ActivePatterns.fs" />
+    <Compile Include="Additionals.fs" />
+    <Compile Include="Raw/CSharpActivePatterns.fs" />
+    <Compile Include="Raw/VisualBasicActivePatterns.fs" />
     <Compile Include="CSharpActivePatterns.fs" />
     <Compile Include="VisualBasicActivePatterns.fs" />
-    <Compile Include="Additionals.fs" />
+    <Compile Include="CSharpAdditionals.fs" />
+    <Compile Include="VisualBasicAdditionals.fs" />
   </ItemGroup>
 
   <ItemGroup>
