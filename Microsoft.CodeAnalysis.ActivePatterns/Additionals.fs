@@ -29,8 +29,16 @@ module Additionals =
   let (|TextToken|) (value:Microsoft.CodeAnalysis.SyntaxToken) =
     TextToken (value.Text)
 
-  let (|IdentifierName|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
-    match node with
-    | CSharp.ActivePatterns.IdentifierNameSyntax(TextToken(text)) -> Some text
-    | VisualBasic.ActivePatterns.IdentifierNameSyntax(TextToken(text)) -> Some text
-    | _ -> None
+  let (|IdentifierName|_|) node : string list option =
+    let rec matcher (node:Microsoft.CodeAnalysis.SyntaxNode) =
+        match node with
+        | CSharp.ActivePatterns.IdentifierNameSyntax(TextToken(text)) ->
+            Some [ text ]
+        | CSharp.ActivePatterns.QualifiedNameSyntax(left, _, right) ->
+            matcher left |> Option.bind(fun left -> matcher right |> Option.bind(fun right -> Some (List.append left right)))
+        | VisualBasic.ActivePatterns.IdentifierNameSyntax(TextToken(text)) ->
+            Some [ text ]
+        | VisualBasic.ActivePatterns.QualifiedNameSyntax(left, _, right) ->
+            matcher left |> Option.bind(fun left -> matcher right |> Option.bind(fun right -> Some (List.append left right)))
+        | _ -> None
+    matcher node

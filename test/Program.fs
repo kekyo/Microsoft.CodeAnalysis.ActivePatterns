@@ -44,9 +44,9 @@ let main argv =
         
     match root with
     | CompilationUnitSyntax
-       (_, [ UsingDirectiveSyntax(_, _, _, IdentifierNameSyntax(TextToken("System")), _)], _,
+       (_, [ UsingDirectiveSyntax(_, _, _, IdentifierName(["System";"Collections";"Generic"]), _)], _,
          [ NamespaceDeclarationSyntax(_,
-            IdentifierNameSyntax(TextToken("SampleNamespace")), _, _, _,
+            IdentifierName(["SampleNamespace"]), _, _, _,
             [ ClassDeclarationSyntax(decl,
                 _, TextToken("SampleClass"), _, _, _, _,
                 memberDecls,
