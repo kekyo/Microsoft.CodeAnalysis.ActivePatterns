@@ -22,5 +22,5 @@ namespace Microsoft.CodeAnalysis
 [<AutoOpen>]
 module Additionals =
 
-  let (|TextToken|) (value:Microsoft.CodeAnalysis.SyntaxToken) =
-    TextToken (value.Text)
+  let (|Text|) (value:Microsoft.CodeAnalysis.SyntaxToken) =
+    Text (value.Text)

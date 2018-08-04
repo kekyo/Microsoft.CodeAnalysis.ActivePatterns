@@ -28,7 +28,7 @@ module Additionals =
   let (|Identifier|_|) node : string list option =
     let rec matcher (node:VisualBasicSyntaxNode) =
         match node with
-        | IdentifierName(TextToken(text)) ->
+        | IdentifierName(Text(text)) ->
             Some [ text ]
         | QualifiedName(left, _, right) ->
             matcher left |> Option.bind(fun left -> matcher right |> Option.bind(fun right -> Some (List.append left right)))

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 
 namespace SampleNamespace
 {
@@ -6,7 +6,7 @@ namespace SampleNamespace
     {
         public SampleClass()
         {
-            this.Value = DateTime.Now.Tick;
+            this.Value = System.DateTime.Now.Tick;
         }
 
         public long Value
@@ -16,3 +16,4 @@ namespace SampleNamespace
         }
     }
 }
+

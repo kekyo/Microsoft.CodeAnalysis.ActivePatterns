@@ -28,10 +28,19 @@ open System
 open System.IO
 open System.Reflection
 open System.Text
+
 open Microsoft.CodeAnalysis
 open Microsoft.CodeAnalysis.CSharp
 open Microsoft.CodeAnalysis.CSharp.Syntax
+
+// This is namespace for active pattern functions.
+// "Explicit" means strongly typed args and return types.
 open Microsoft.CodeAnalysis.CSharp.Explicit
+
+// You can use "Implicit" namespace if you require loose traverser by base AST node types.
+// (ex: Microsoft.CodeAnalysis.SyntaxNode)
+// Implicit pattern functions NOT lesser than Explicit.
+// Because it can make unified traverser for C# and VB AST nodes.
 
 [<EntryPoint>]
 let main argv =
@@ -43,20 +52,24 @@ let main argv =
     let tree = CSharpSyntaxTree.ParseText sampleCode :?> CSharpSyntaxTree
     let root = tree.GetRoot()
         
+    // Roslyn C# AST can handle by F#'s pattern matching.
+    // AST types deconstructs by this library's active pattern functions.
+    // And syntax node pattern naming is shorter.
+
     match root with
     | CompilationUnit
        (_, [ UsingDirective(_, _, _, Identifier(["System";"Collections";"Generic"]), _)], _,
          [ NamespaceDeclaration(_,
             Identifier(["SampleNamespace"]), _, _, _,
             [ ClassDeclaration(decl,
-                _, TextToken("SampleClass"), _, _, _, _,
+                _, Text("SampleClass"), _, _, _, _,
                 memberDecls,
                 _, _)],
             _, _) ],
          _) ->
             memberDecls
             |> Seq.choose (function
-              | PropertyDeclaration(_, typeSyntax, _, TextToken(id), _, _, _, _) ->
+              | PropertyDeclaration(_, typeSyntax, _, Text(id), _, _, _, _) ->
                  Some (typeSyntax, id)
               | _ -> None)
             |> Seq.iter (printf "%A")

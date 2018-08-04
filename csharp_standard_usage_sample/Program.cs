@@ -45,6 +45,21 @@ namespace csharp_standard_usage_sample
             }
         }
 
+        private static string TraverseNameSyntax(NameSyntax name)
+        {
+            if (name is IdentifierNameSyntax idName)
+            {
+                return idName.Identifier.Text;
+            }
+
+            if (name is QualifiedNameSyntax qName)
+            {
+                return TraverseNameSyntax(qName.Left) + "." + TraverseNameSyntax(qName.Right);
+            }
+
+            return string.Empty;
+        }
+
         static void Main(string[] args)
         {
             var sampleCode = ReadSampleCode();
@@ -56,32 +71,21 @@ namespace csharp_standard_usage_sample
 
             if (root.Usings.Any(u =>
             {
-                var idName = u.Name as IdentifierNameSyntax;
-                if (idName != null)
-                {
-                    var syntaxToken = idName.Identifier.Text;
-                    if (syntaxToken == "System")
-                    {
-                        return true;
-                    }
-                }
-                return false;
+                var name = TraverseNameSyntax(u.Name);
+                return name == "System.Collections.Generic";
             }))
             {
                 if (root.Members.Any(m =>
                 {
-                    var nameDecl = m as NamespaceDeclarationSyntax;
-                    if (nameDecl != null)
+                    if (m is NamespaceDeclarationSyntax nameDecl)
                     {
-                        var name = nameDecl.Name as IdentifierNameSyntax;
-                        if (name != null)
+                        if (nameDecl.Name is IdentifierNameSyntax name)
                         {
                             if (name.Identifier.Text == "SampleNamespace")
                             {
                                 if (nameDecl.Members.Any(m2 =>
                                 {
-                                    var classDecl = m2 as ClassDeclarationSyntax;
-                                    if (classDecl != null)
+                                    if (m2 is ClassDeclarationSyntax classDecl)
                                     {
                                         var name2 = classDecl.Identifier.Text;
                                         if (name2 == "SampleClass")
