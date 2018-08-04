@@ -31,6 +31,7 @@ open System.Text
 open Microsoft.CodeAnalysis
 open Microsoft.CodeAnalysis.CSharp
 open Microsoft.CodeAnalysis.CSharp.Syntax
+open Microsoft.CodeAnalysis.CSharp.Explicit
 
 [<EntryPoint>]
 let main argv =

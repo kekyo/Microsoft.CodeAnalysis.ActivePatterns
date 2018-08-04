@@ -17,19 +17,20 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-namespace Microsoft.CodeAnalysis.VisualBasic
+namespace Microsoft.CodeAnalysis.VisualBasic.Explicit
 
 open Microsoft.CodeAnalysis
+open Microsoft.CodeAnalysis.VisualBasic
 
 [<AutoOpen>]
-module VisualBasicAdditionals =
+module Additionals =
 
   let (|IdentifierName|_|) node : string list option =
-    let rec matcher (node:Microsoft.CodeAnalysis.VisualBasic.VisualBasicSyntaxNode) =
+    let rec matcher (node:VisualBasicSyntaxNode) =
         match node with
-        | VisualBasicActivePatterns.IdentifierNameSyntax(TextToken(text)) ->
+        | IdentifierNameSyntax(TextToken(text)) ->
             Some [ text ]
-        | VisualBasicActivePatterns.QualifiedNameSyntax(left, _, right) ->
+        | QualifiedNameSyntax(left, _, right) ->
             matcher left |> Option.bind(fun left -> matcher right |> Option.bind(fun right -> Some (List.append left right)))
         | _ -> None
     matcher node

@@ -170,29 +170,29 @@ let main argv =
 
     let csharpNodeType = typeof<Microsoft.CodeAnalysis.CSharp.CSharpSyntaxNode>
     generateActivePatternsForSyntax
-        (getTargetPath "Raw" "CSharpActivePatterns.fs")
-        (csharpNodeType.Namespace + ".Raw")
-        "CSharpActivePatterns"
+        (getTargetPath "Implicit" "CSharpActivePatterns.fs")
+        (csharpNodeType.Namespace + ".Implicit")
+        "ActivePatterns"
         (syntaxTypes csharpNodeType)
         (fun t -> (baseAbstractType objType t).FullName)
     generateActivePatternsForSyntax
-        (getTargetPath "" "CSharpActivePatterns.fs")
-        csharpNodeType.Namespace
-        "CSharpActivePatterns"
+        (getTargetPath "Explicit" "CSharpActivePatterns.fs")
+        (csharpNodeType.Namespace + ".Explicit")
+        "ActivePatterns"
         (syntaxTypes csharpNodeType)
         (fun t -> (baseAbstractType csharpNodeType t).FullName)
 
     let visualBasicNodeType = typeof<Microsoft.CodeAnalysis.VisualBasic.VisualBasicSyntaxNode>
     generateActivePatternsForSyntax
-        (getTargetPath "Raw" "VisualBasicActivePatterns.fs")
-        (visualBasicNodeType.Namespace + ".Raw")
-        "VisualBasicActivePatterns"
+        (getTargetPath "Implicit" "VisualBasicActivePatterns.fs")
+        (visualBasicNodeType.Namespace + ".Implicit")
+        "ActivePatterns"
         (syntaxTypes visualBasicNodeType)
         (fun t -> (baseAbstractType objType t).FullName)
     generateActivePatternsForSyntax
-        (getTargetPath "" "VisualBasicActivePatterns.fs")
-        visualBasicNodeType.Namespace
-        "VisualBasicActivePatterns"
+        (getTargetPath "Explicit" "VisualBasicActivePatterns.fs")
+        (visualBasicNodeType.Namespace + ".Explicit")
+        "ActivePatterns"
         (syntaxTypes visualBasicNodeType)
         (fun t -> (baseAbstractType visualBasicNodeType t).FullName)
 

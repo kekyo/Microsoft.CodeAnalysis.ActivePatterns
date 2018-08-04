@@ -1,7 +1,7 @@
-namespace Microsoft.CodeAnalysis.CSharp.Raw
+namespace Microsoft.CodeAnalysis.CSharp.Implicit
 
 [<AutoOpen>]
-module CSharpActivePatterns =
+module ActivePatterns =
 
   let (|IdentifierNameSyntax|_|) (node:Microsoft.CodeAnalysis.SyntaxNode) =
     match node with
