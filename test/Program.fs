@@ -44,11 +44,11 @@ let main argv =
     let root = tree.GetRoot()
         
     match root with
-    | CompilationUnitSyntax
-       (_, [ UsingDirectiveSyntax(_, _, _, IdentifierName(["System";"Collections";"Generic"]), _)], _,
-         [ NamespaceDeclarationSyntax(_,
-            IdentifierName(["SampleNamespace"]), _, _, _,
-            [ ClassDeclarationSyntax(decl,
+    | CompilationUnit
+       (_, [ UsingDirective(_, _, _, Identifier(["System";"Collections";"Generic"]), _)], _,
+         [ NamespaceDeclaration(_,
+            Identifier(["SampleNamespace"]), _, _, _,
+            [ ClassDeclaration(decl,
                 _, TextToken("SampleClass"), _, _, _, _,
                 memberDecls,
                 _, _)],
@@ -56,7 +56,7 @@ let main argv =
          _) ->
             memberDecls
             |> Seq.choose (function
-              | PropertyDeclarationSyntax(_, typeSyntax, _, TextToken(id), _, _, _, _) ->
+              | PropertyDeclaration(_, typeSyntax, _, TextToken(id), _, _, _, _) ->
                  Some (typeSyntax, id)
               | _ -> None)
             |> Seq.iter (printf "%A")

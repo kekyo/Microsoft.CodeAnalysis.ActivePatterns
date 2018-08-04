@@ -25,12 +25,12 @@ open Microsoft.CodeAnalysis.VisualBasic
 [<AutoOpen>]
 module Additionals =
 
-  let (|IdentifierName|_|) node : string list option =
+  let (|Identifier|_|) node : string list option =
     let rec matcher (node:VisualBasicSyntaxNode) =
         match node with
-        | IdentifierNameSyntax(TextToken(text)) ->
+        | IdentifierName(TextToken(text)) ->
             Some [ text ]
-        | QualifiedNameSyntax(left, _, right) ->
+        | QualifiedName(left, _, right) ->
             matcher left |> Option.bind(fun left -> matcher right |> Option.bind(fun right -> Some (List.append left right)))
         | _ -> None
     matcher node

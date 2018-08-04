@@ -76,8 +76,14 @@ let getTupleArgs (t: Type) (name: string) =
               None)
       |> Seq.toArray
 
+let writeHeader (tw: TextWriter) =
+    tw.WriteLine("// This is auto-generated source code by Microsoft.CodeAnalysis.ActivePatterns, DO NOT EDIT!")
+    tw.WriteLine()
+
 let generateActivePatternsForValue path (namespaceName: string) (valueTypes: Type seq) (nodeName: Type -> string) =
     use tw = File.CreateText(path)
+
+    writeHeader tw
 
     tw.WriteLine("namespace {0}", namespaceName)
     tw.WriteLine()
@@ -97,8 +103,10 @@ let generateActivePatternsForValue path (namespaceName: string) (valueTypes: Typ
 
     tw.Flush()
 
-let generateActivePatternsForSyntax path (namespaceName: string) (moduleName: string) (syntaxTypes: Type seq) (nodeName: Type -> string) =
+let generateActivePatternsForSyntax path (namespaceName: string) (moduleName: string) (syntaxTypes: Type seq) (nodeName: Type -> string) (getPatternName: Type -> string) =
     use tw = File.CreateText(path)
+
+    writeHeader tw
 
     tw.WriteLine("namespace {0}", namespaceName)
     tw.WriteLine()
@@ -111,7 +119,7 @@ let generateActivePatternsForSyntax path (namespaceName: string) (moduleName: st
         if not (Array.isEmpty tupleArgs) then
             tw.WriteLine(
                 "  let (|{0}|_|) (node:{1}) =",
-                t.Name,
+                getPatternName t,
                 nodeName t)
             tw.WriteLine("    match node with")
             tw.WriteLine("    | :? {0} as node ->", t.FullName)
@@ -166,6 +174,17 @@ let main argv =
                 t
             else
                 baseAbstractType bottomType baseType
+    
+    let getNodeName bottomType t =
+        (baseAbstractType bottomType t).FullName
+    
+    let getPatternName (t: Type) =
+        let name = t.Name
+        if name.EndsWith "Syntax" then
+            name.Substring(0, name.Length - 6)
+        else
+            name
+
     let objType = typeof<obj>
 
     let csharpNodeType = typeof<Microsoft.CodeAnalysis.CSharp.CSharpSyntaxNode>
@@ -174,13 +193,15 @@ let main argv =
         (csharpNodeType.Namespace + ".Implicit")
         "ActivePatterns"
         (syntaxTypes csharpNodeType)
-        (fun t -> (baseAbstractType objType t).FullName)
+        (getNodeName objType)
+        getPatternName
     generateActivePatternsForSyntax
         (getTargetPath "Explicit" "CSharpActivePatterns.fs")
         (csharpNodeType.Namespace + ".Explicit")
         "ActivePatterns"
         (syntaxTypes csharpNodeType)
-        (fun t -> (baseAbstractType csharpNodeType t).FullName)
+        (getNodeName csharpNodeType)
+        getPatternName
 
     let visualBasicNodeType = typeof<Microsoft.CodeAnalysis.VisualBasic.VisualBasicSyntaxNode>
     generateActivePatternsForSyntax
@@ -188,12 +209,14 @@ let main argv =
         (visualBasicNodeType.Namespace + ".Implicit")
         "ActivePatterns"
         (syntaxTypes visualBasicNodeType)
-        (fun t -> (baseAbstractType objType t).FullName)
+        (getNodeName objType)
+        getPatternName
     generateActivePatternsForSyntax
         (getTargetPath "Explicit" "VisualBasicActivePatterns.fs")
         (visualBasicNodeType.Namespace + ".Explicit")
         "ActivePatterns"
         (syntaxTypes visualBasicNodeType)
-        (fun t -> (baseAbstractType visualBasicNodeType t).FullName)
+        (getNodeName visualBasicNodeType)
+        getPatternName
 
     0
