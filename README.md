@@ -17,7 +17,7 @@ This library auguments for Roslyn AST (Abstract syntax tree nodes) types by F# a
 ### This code fragment for Roslyn analysis target:
 
 ```csharp
-using System;
+using System.Collections.Generic;
 
 namespace SampleNamespace
 {
@@ -25,7 +25,7 @@ namespace SampleNamespace
     {
         public SampleClass()
         {
-            this.Value = DateTime.Now.Tick;
+            this.Value = System.DateTime.Now.Tick;
         }
 
         public long Value
@@ -37,7 +37,7 @@ namespace SampleNamespace
 }
 ```
 
-### This code fragment for using Roslyn by C#:
+### This code fragment for Roslyn using C#:
 
 ```csharp
 using System.IO;
@@ -51,55 +51,58 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// (These are not better and rough codes, but maybe longer analysis codes by using C#...)
 namespace csharp_sample
 {
-    class Program
+    static class Program
     {
         private static string ReadSampleCode()
         {
-            using (var fs = Assembly.GetEntryAssembly().GetManifestResourceStream("csharp_sample.Sample.cs"))
+            using (var fs = Assembly.GetEntryAssembly().GetManifestResourceStream("csharp_standard_usage_sample.Sample.cs"))
             {
                 var tr = new StreamReader(fs, Encoding.UTF8);
                 return tr.ReadToEnd();
             }
         }
 
+        private static string TraverseNameSyntax(NameSyntax name)
+        {
+            if (name is IdentifierNameSyntax idName)
+            {
+                return idName.Identifier.Text;
+            }
+
+            if (name is QualifiedNameSyntax qName)
+            {
+                return TraverseNameSyntax(qName.Left) + "." + TraverseNameSyntax(qName.Right);
+            }
+
+            return string.Empty;
+        }
+
         static void Main(string[] args)
         {
             var sampleCode = ReadSampleCode();
 
-            var tree = CSharpSyntaxTree.ParseText(sampleCode);
+            var tree = (CSharpSyntaxTree) CSharpSyntaxTree.ParseText(sampleCode);
             var root = (CompilationUnitSyntax)tree.GetRoot();
 
-            // Check for "using System;"
+            // Too complex if we have to analyze roslyn AST using C#...
+
             if (root.Usings.Any(u =>
             {
-                var idName = u.Name as IdentifierNameSyntax;
-                if (idName != null)
-                {
-                    var syntaxToken = idName.Identifier.Text;
-                    if (syntaxToken == "System")
-                    {
-                        return true;
-                    }
-                }
-                return false;
+                var name = TraverseNameSyntax(u.Name);
+                return name == "System.Collections.Generic";
             }))
             {
-                // Check for "namespace SampleNamespace {...}"
                 if (root.Members.Any(m =>
                 {
-                    var nameDecl = m as NamespaceDeclarationSyntax;
-                    if (nameDecl != null)
+                    if (m is NamespaceDeclarationSyntax nameDecl)
                     {
-                        var name = nameDecl.Name as IdentifierNameSyntax;
-                        if (name != null)
+                        if (nameDecl.Name is IdentifierNameSyntax name)
                         {
                             if (name.Identifier.Text == "SampleNamespace")
                             {
-                                // Check for "class SampleClass {...}"
                                 if (nameDecl.Members.Any(m2 =>
                                 {
-                                    var classDecl = m2 as ClassDeclarationSyntax;
-                                    if (classDecl != null)
+                                    if (m2 is ClassDeclarationSyntax classDecl)
                                     {
                                         var name2 = classDecl.Identifier.Text;
                                         if (name2 == "SampleClass")
@@ -133,8 +136,12 @@ open System
 open System.IO
 open System.Reflection
 open System.Text
+
 open Microsoft.CodeAnalysis
 open Microsoft.CodeAnalysis.CSharp
+
+// This is a namespace for active pattern functions.
+open Microsoft.CodeAnalysis.CSharp.Strict
 
 [<EntryPoint>]
 let main argv =
@@ -146,28 +153,30 @@ let main argv =
     let tree = CSharpSyntaxTree.ParseText sampleCode
     let root = tree.GetRoot() :?> CSharpSyntaxNode
         
-    // Roslyn C# AST can handling by F#'s pattern matching!!
-    // (AST types deconstructs by this library's active pattern functions.)
+    // Roslyn C# AST can handle by F#'s pattern matching.
+    // AST types deconstructs by this library's active pattern functions.
+    // And syntax node pattern naming is shorter.
+
     match root with
-    | CompilationUnitSyntax
-        (_, [ UsingDirectiveSyntax(_, _, _, IdentifierNameSyntax(TextToken("System")), _)], _,
-         [ NamespaceDeclarationSyntax(_,
-            IdentifierNameSyntax(TextToken("SampleNamespace")), _, _, _,
-            [ ClassDeclarationSyntax(decl,
-                _, TextToken("SampleClass"), _, _, _, _,
+    | CompilationUnit
+       (_, [ UsingDirective(_, _, _, Identifier(["System";"Collections";"Generic"]), _)], _,
+         [ NamespaceDeclaration(_,
+            Identifier(["SampleNamespace"]), _, _, _,
+            [ ClassDeclaration(decl,
+                _, Text("SampleClass"), _, _, _, _,
                 memberDecls,
                 _, _)],
             _, _) ],
          _) ->
             memberDecls
             |> Seq.choose (function
-              | PropertyDeclarationSyntax(_, typeSyntax, _, TextToken(id), _, _, _, _) ->
+              | PropertyDeclaration(_, typeSyntax, _, Text(id), _, _, _, _) ->
                  Some (typeSyntax, id)
               | _ -> None)
             |> Seq.iter (printf "%A")
             
     | _ -> ()
-0
+    0
 ```
 
 ## Platform
@@ -187,6 +196,9 @@ let main argv =
 * Add additional custom functions.
 
 ## History
+* 0.8.1:
+  * More shorter SyntaxNode related names (ex: CompilationUnitSyntax --> CompilationUnit).
+  * Support strict and loose active patterns.
 * 0.7.1:
   * Support .NET Standard, .NET Core 2 and F# 4.5 (4.5.2), based Roslyn 2.8.2.
 * 0.5.1:

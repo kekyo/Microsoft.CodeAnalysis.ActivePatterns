@@ -17,7 +17,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-namespace Microsoft.CodeAnalysis.VisualBasic.Explicit
+namespace Microsoft.CodeAnalysis.VisualBasic.Strict
 
 open Microsoft.CodeAnalysis
 open Microsoft.CodeAnalysis.VisualBasic
@@ -32,5 +32,6 @@ module Additionals =
             Some [ text ]
         | QualifiedName(left, _, right) ->
             matcher left |> Option.bind(fun left -> matcher right |> Option.bind(fun right -> Some (List.append left right)))
-        | _ -> None
+        | _ ->
+            None
     matcher node

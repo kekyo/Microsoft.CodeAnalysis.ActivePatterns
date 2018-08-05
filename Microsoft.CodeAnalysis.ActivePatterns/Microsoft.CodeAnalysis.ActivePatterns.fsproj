@@ -20,14 +20,12 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="ActivePatterns.fs" />
     <Compile Include="Additionals.fs" />
-    <Compile Include="Implicit/CSharpActivePatterns.fs" />
-    <Compile Include="Implicit/VisualBasicActivePatterns.fs" />
-    <Compile Include="Implicit/CSharpAdditionals.fs" />
-    <Compile Include="Implicit/VisualBasicAdditionals.fs" />
-    <Compile Include="Explicit/CSharpActivePatterns.fs" />
-    <Compile Include="Explicit/VisualBasicActivePatterns.fs" />
-    <Compile Include="Explicit/CSharpAdditionals.fs" />
-    <Compile Include="Explicit/VisualBasicAdditionals.fs" />
+    <Compile Include="Loose\ActivePatterns.fs" />
+    <Compile Include="Loose\Additionals.fs" />
+    <Compile Include="Strict\CSharpActivePatterns.fs" />
+    <Compile Include="Strict\VisualBasicActivePatterns.fs" />
+    <Compile Include="Strict\CSharpAdditionals.fs" />
+    <Compile Include="Strict\VisualBasicAdditionals.fs" />
   </ItemGroup>
 
   <ItemGroup>
