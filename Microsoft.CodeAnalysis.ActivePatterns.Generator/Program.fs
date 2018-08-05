@@ -22,10 +22,13 @@ module Generator
 open System
 open System.IO
 open System.Reflection
+open System.Diagnostics
 
-let syntaxListType =
-    typedefof<Microsoft.CodeAnalysis.SyntaxList<_>>
-let syntaxNodeType = typeof<Microsoft.CodeAnalysis.SyntaxNode>
+let baseNodeType = typeof<Microsoft.CodeAnalysis.SyntaxNode>
+let csharpNodeType = typeof<Microsoft.CodeAnalysis.CSharp.CSharpSyntaxNode>
+let visualBasicNodeType = typeof<Microsoft.CodeAnalysis.VisualBasic.VisualBasicSyntaxNode>
+
+let syntaxListType = typedefof<Microsoft.CodeAnalysis.SyntaxList<_>>
 let syntaxTokenType = typeof<Microsoft.CodeAnalysis.SyntaxToken>
 
 let (|Value|Token|Node|List|Another|) (t:Type) =
@@ -33,7 +36,7 @@ let (|Value|Token|Node|List|Another|) (t:Type) =
         Value t
     else if syntaxTokenType.IsAssignableFrom t then
         Token t
-    else if syntaxNodeType.IsAssignableFrom t then
+    else if baseNodeType.IsAssignableFrom t then
         Node t
     else if t.IsGenericType && (t.GetGenericTypeDefinition() = syntaxListType) then
         List (t.GetGenericArguments().[0])
@@ -76,10 +79,6 @@ let getTupleArgsString (name: string) (p: PropertyInfo) =
         Some (String.Format("{0}.{1} |> Seq.toList", name, p.Name))
     | Another ->
         None
-
-let baseNodeType = typeof<Microsoft.CodeAnalysis.SyntaxNode>
-let csharpNodeType = typeof<Microsoft.CodeAnalysis.CSharp.CSharpSyntaxNode>
-let visualBasicNodeType = typeof<Microsoft.CodeAnalysis.VisualBasic.VisualBasicSyntaxNode>
 
 let writeHeader (tw: TextWriter) =
     tw.WriteLine("// This is auto-generated source code by Microsoft.CodeAnalysis.ActivePatterns, DO NOT EDIT!")
@@ -130,22 +129,36 @@ let generateLooseActivePatternsForSyntax path (namespaceName: string) (syntaxTyp
     tw.WriteLine()
 
     syntaxTypes
+    // Combined by active pattern name (both C# and VB)
     |> Seq.groupBy getPatternName
     |> Seq.iter (fun (patternName, types) ->
-        let argsByTypesList =
+        let argPropertiesByTypesList =
             types
-            |> Seq.map (fun t -> (t, getTupleArgs t |> Seq.choose (getTupleArgsString "node") |> Seq.toArray))
-            |> Seq.filter (fun (_, tupleArgs) -> not (Array.isEmpty tupleArgs))
+            |> Seq.map (fun t -> t, getTupleArgs t)
+            |> Seq.filter (fun (_, ps) ->
+                // Cannot deconstruct nothing properties
+                (not (Array.isEmpty ps))
+                // Cannot deconstruct contains unknown property types
+                && (not (ps |> Seq.exists(fun p -> match p.PropertyType with Another -> true | _ -> false))))
             |> Seq.toArray
 
-        if not (Array.isEmpty argsByTypesList) then
+        // 0 ~ [C#; VB]
+        Debug.Assert(argPropertiesByTypesList.Length <= 2)
+
+        if not (Array.isEmpty argPropertiesByTypesList) then
+            // Generate argument expressions
+            let argStringsByTypesList =
+                argPropertiesByTypesList
+                |> Seq.map (fun (t, ps) -> t, ps |> Seq.choose (getTupleArgsString "node") |> Seq.toArray)
+                |> Seq.toArray
+
             tw.WriteLine(
                 "  let (|{0}|_|) (node:{1}) =",
                 patternName,
                 nodeName baseNodeType)
             tw.WriteLine("    match node with")
 
-            argsByTypesList |> Seq.iter(fun (t, tupleArgs) ->
+            argStringsByTypesList |> Seq.iter(fun (t, tupleArgs) ->
                 tw.WriteLine("    | :? {0} as node ->", t.FullName)
                 tw.WriteLine("      Some ({0})", String.Join(", ", tupleArgs)))
 
