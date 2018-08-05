@@ -33,13 +33,13 @@ open Microsoft.CodeAnalysis
 open Microsoft.CodeAnalysis.CSharp
 open Microsoft.CodeAnalysis.CSharp.Syntax
 
-// This is namespace for active pattern functions.
-// "Explicit" means strongly typed args and return types.
-open Microsoft.CodeAnalysis.CSharp.Explicit
+// This is a namespace for active pattern functions.
+// "Strict" means strongly typed args and return types.
+open Microsoft.CodeAnalysis.CSharp.Strict
 
-// You can use "Implicit" namespace if you require loose traverser by base AST node types.
+// You can use "Loose" namespace if you are requiring loose traverser by base AST node types.
 // (ex: Microsoft.CodeAnalysis.SyntaxNode)
-// Implicit pattern functions NOT lesser than Explicit.
+// Loose pattern functions NOT lesser than Strict.
 // Because it can make unified traverser for C# and VB AST nodes.
 
 [<EntryPoint>]

@@ -17,7 +17,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-namespace Microsoft.CodeAnalysis.CSharp.Explicit
+namespace Microsoft.CodeAnalysis.Loose
 
 open Microsoft.CodeAnalysis
 open Microsoft.CodeAnalysis.CSharp
@@ -26,7 +26,7 @@ open Microsoft.CodeAnalysis.CSharp
 module Additionals =
 
   let (|Identifier|_|) node : string list option =
-    let rec matcher (node:CSharpSyntaxNode) =
+    let rec matcher (node:SyntaxNode) =
         match node with
         | IdentifierName(Text(text)) ->
             Some [ text ]

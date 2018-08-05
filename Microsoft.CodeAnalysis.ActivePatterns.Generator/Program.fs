@@ -60,26 +60,31 @@ let targetProperty (p: PropertyInfo) =
     | _, _, _, _, Node et
     | _, _, _, _, List et -> Some p
     | _ -> None
-let getTupleArgs (t: Type) (name: string) =
+    
+let getTupleArgs (t: Type) =
       t.GetProperties(BindingFlags.Public ||| BindingFlags.Instance ||| BindingFlags.DeclaredOnly)
       |> Seq.choose targetProperty
       |> Seq.toArray
-      |> Seq.choose (fun p ->
-          match p.PropertyType with
-          | Value et
-          | Token et
-          | Node et ->
-              Some (String.Format("{0}.{1}", name, p.Name))
-          | List et ->
-              Some (String.Format("{0}.{1} |> Seq.toList", name, p.Name))
-          | Another ->
-              None)
-      |> Seq.toArray
+
+let getTupleArgsString (name: string) (p: PropertyInfo) =
+    match p.PropertyType with
+    | Value et
+    | Token et
+    | Node et ->
+        Some (String.Format("{0}.{1}", name, p.Name))
+    | List et ->
+        Some (String.Format("{0}.{1} |> Seq.toList", name, p.Name))
+    | Another ->
+        None
+
+let baseNodeType = typeof<Microsoft.CodeAnalysis.SyntaxNode>
+let csharpNodeType = typeof<Microsoft.CodeAnalysis.CSharp.CSharpSyntaxNode>
+let visualBasicNodeType = typeof<Microsoft.CodeAnalysis.VisualBasic.VisualBasicSyntaxNode>
 
 let writeHeader (tw: TextWriter) =
     tw.WriteLine("// This is auto-generated source code by Microsoft.CodeAnalysis.ActivePatterns, DO NOT EDIT!")
     tw.WriteLine()
-
+       
 let generateActivePatternsForValue path (namespaceName: string) (valueTypes: Type seq) (nodeName: Type -> string) =
     use tw = File.CreateText(path)
 
@@ -92,7 +97,10 @@ let generateActivePatternsForValue path (namespaceName: string) (valueTypes: Typ
     tw.WriteLine()
 
     valueTypes |> Seq.iter (fun t ->
-        let tupleArgs = getTupleArgs t "value"
+        let tupleArgs =
+            getTupleArgs t
+            |> Seq.choose (getTupleArgsString "value")
+            |> Seq.toArray
         if not (Array.isEmpty tupleArgs) then
             tw.WriteLine(
                 "  let (|{0}|) (value:{1}) =",
@@ -103,7 +111,14 @@ let generateActivePatternsForValue path (namespaceName: string) (valueTypes: Typ
 
     tw.Flush()
 
-let generateActivePatternsForSyntax path (namespaceName: string) (moduleName: string) (syntaxTypes: Type seq) (nodeName: Type -> string) (getPatternName: Type -> string) =
+let getPatternName (t: Type) =
+    let name = t.Name
+    if name.EndsWith "Syntax" then
+        name.Substring(0, name.Length - 6)
+    else
+        name
+
+let generateLooseActivePatternsForSyntax path (namespaceName: string) (syntaxTypes: Type seq) (nodeName: Type -> string) =
     use tw = File.CreateText(path)
 
     writeHeader tw
@@ -111,11 +126,50 @@ let generateActivePatternsForSyntax path (namespaceName: string) (moduleName: st
     tw.WriteLine("namespace {0}", namespaceName)
     tw.WriteLine()
     tw.WriteLine("[<AutoOpen>]")
-    tw.WriteLine("module {0} =", moduleName)
+    tw.WriteLine("module ActivePatterns =")
+    tw.WriteLine()
+
+    syntaxTypes
+    |> Seq.groupBy getPatternName
+    |> Seq.iter (fun (patternName, types) ->
+        let argsByTypesList =
+            types
+            |> Seq.map (fun t -> (t, getTupleArgs t |> Seq.choose (getTupleArgsString "node") |> Seq.toArray))
+            |> Seq.filter (fun (_, tupleArgs) -> not (Array.isEmpty tupleArgs))
+            |> Seq.toArray
+
+        if not (Array.isEmpty argsByTypesList) then
+            tw.WriteLine(
+                "  let (|{0}|_|) (node:{1}) =",
+                patternName,
+                nodeName baseNodeType)
+            tw.WriteLine("    match node with")
+
+            argsByTypesList |> Seq.iter(fun (t, tupleArgs) ->
+                tw.WriteLine("    | :? {0} as node ->", t.FullName)
+                tw.WriteLine("      Some ({0})", String.Join(", ", tupleArgs)))
+
+            tw.WriteLine("    | _ -> None")
+            tw.WriteLine())
+
+    tw.Flush()
+
+let generateStrictActivePatternsForSyntax path (namespaceName: string) (syntaxTypes: Type seq) (nodeName: Type -> string) =
+    use tw = File.CreateText(path)
+
+    writeHeader tw
+
+    tw.WriteLine("namespace {0}", namespaceName)
+    tw.WriteLine()
+    tw.WriteLine("[<AutoOpen>]")
+    tw.WriteLine("module ActivePatterns =")
     tw.WriteLine()
 
     syntaxTypes |> Seq.iter (fun t ->
-        let tupleArgs = getTupleArgs t "node"
+        let tupleArgs =
+            getTupleArgs t
+            |> Seq.choose (getTupleArgsString "node")
+            |> Seq.toArray
         if not (Array.isEmpty tupleArgs) then
             tw.WriteLine(
                 "  let (|{0}|_|) (node:{1}) =",
@@ -135,6 +189,19 @@ let getTargetPath (prefix: string) fileName =
     else
         (Path.Combine("..","..","..","..", "Microsoft.CodeAnalysis.ActivePatterns", fileName))
 
+let rec baseAbstractType (bottomType: Type) (t: Type) =
+    if t = bottomType then
+        t
+    else
+        let baseType = t.BaseType
+        if not baseType.IsAbstract && t.IsAbstract then
+            t
+        else
+            baseAbstractType bottomType baseType
+    
+let getNodeName bottomType t =
+    (baseAbstractType bottomType t).FullName
+        
 [<EntryPoint>]
 let main argv =
     let valueTypes (nodeType: Type) =
@@ -147,12 +214,10 @@ let main argv =
             (not (isObsoleted t)))
         |> Seq.toArray
 
-    let nodeType = typeof<Microsoft.CodeAnalysis.SyntaxNode>
-            
     generateActivePatternsForValue
         (getTargetPath "" "ActivePatterns.fs")
         "Microsoft.CodeAnalysis"
-        (valueTypes nodeType)
+        (valueTypes baseNodeType)
         (fun t -> t.FullName)
 
     let syntaxTypes (nodeType: Type) =
@@ -165,58 +230,21 @@ let main argv =
             (not (isObsoleted t)))
         |> Seq.toArray
 
-    let rec baseAbstractType (bottomType: Type) (t: Type) =
-        if t = bottomType then
-            t
-        else
-            let baseType = t.BaseType
-            if not baseType.IsAbstract && t.IsAbstract then
-                t
-            else
-                baseAbstractType bottomType baseType
-    
-    let getNodeName bottomType t =
-        (baseAbstractType bottomType t).FullName
-    
-    let getPatternName (t: Type) =
-        let name = t.Name
-        if name.EndsWith "Syntax" then
-            name.Substring(0, name.Length - 6)
-        else
-            name
+    generateLooseActivePatternsForSyntax
+        (getTargetPath "Loose" "ActivePatterns.fs")
+        (baseNodeType.Namespace + ".Loose")
+        (Seq.append (syntaxTypes csharpNodeType) (syntaxTypes visualBasicNodeType))
+        (getNodeName baseNodeType)
 
-    let objType = typeof<obj>
-
-    let csharpNodeType = typeof<Microsoft.CodeAnalysis.CSharp.CSharpSyntaxNode>
-    generateActivePatternsForSyntax
-        (getTargetPath "Implicit" "CSharpActivePatterns.fs")
-        (csharpNodeType.Namespace + ".Implicit")
-        "ActivePatterns"
-        (syntaxTypes csharpNodeType)
-        (getNodeName objType)
-        getPatternName
-    generateActivePatternsForSyntax
-        (getTargetPath "Explicit" "CSharpActivePatterns.fs")
-        (csharpNodeType.Namespace + ".Explicit")
-        "ActivePatterns"
+    generateStrictActivePatternsForSyntax
+        (getTargetPath "Strict" "CSharpActivePatterns.fs")
+        (csharpNodeType.Namespace + ".Strict")
         (syntaxTypes csharpNodeType)
         (getNodeName csharpNodeType)
-        getPatternName
-
-    let visualBasicNodeType = typeof<Microsoft.CodeAnalysis.VisualBasic.VisualBasicSyntaxNode>
-    generateActivePatternsForSyntax
-        (getTargetPath "Implicit" "VisualBasicActivePatterns.fs")
-        (visualBasicNodeType.Namespace + ".Implicit")
-        "ActivePatterns"
-        (syntaxTypes visualBasicNodeType)
-        (getNodeName objType)
-        getPatternName
-    generateActivePatternsForSyntax
-        (getTargetPath "Explicit" "VisualBasicActivePatterns.fs")
-        (visualBasicNodeType.Namespace + ".Explicit")
-        "ActivePatterns"
+    generateStrictActivePatternsForSyntax
+        (getTargetPath "Strict" "VisualBasicActivePatterns.fs")
+        (visualBasicNodeType.Namespace + ".Strict")
         (syntaxTypes visualBasicNodeType)
         (getNodeName visualBasicNodeType)
-        getPatternName
 
     0

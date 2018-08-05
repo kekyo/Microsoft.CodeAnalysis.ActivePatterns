@@ -17,20 +17,21 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-namespace Microsoft.CodeAnalysis.VisualBasic.Implicit
+namespace Microsoft.CodeAnalysis.CSharp.Strict
 
 open Microsoft.CodeAnalysis
-open Microsoft.CodeAnalysis.VisualBasic
+open Microsoft.CodeAnalysis.CSharp
 
 [<AutoOpen>]
 module Additionals =
 
   let (|Identifier|_|) node : string list option =
-    let rec matcher (node:SyntaxNode) =
+    let rec matcher (node:CSharpSyntaxNode) =
         match node with
         | IdentifierName(Text(text)) ->
             Some [ text ]
         | QualifiedName(left, _, right) ->
             matcher left |> Option.bind(fun left -> matcher right |> Option.bind(fun right -> Some (List.append left right)))
-        | _ -> None
+        | _ ->
+            None
     matcher node
