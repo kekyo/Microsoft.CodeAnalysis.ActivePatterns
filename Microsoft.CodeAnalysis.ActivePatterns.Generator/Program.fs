@@ -24,12 +24,25 @@ open System.IO
 open System.Reflection
 open System.Diagnostics
 
+////////////////////////////////////////////
+
+let objType = typeof<obj>
+let seqType = typedefof<seq<_>>
+
 let baseNodeType = typeof<Microsoft.CodeAnalysis.SyntaxNode>
 let csharpNodeType = typeof<Microsoft.CodeAnalysis.CSharp.CSharpSyntaxNode>
 let visualBasicNodeType = typeof<Microsoft.CodeAnalysis.VisualBasic.VisualBasicSyntaxNode>
 
 let syntaxListType = typedefof<Microsoft.CodeAnalysis.SyntaxList<_>>
 let syntaxTokenType = typeof<Microsoft.CodeAnalysis.SyntaxToken>
+
+////////////////////////////////////////////
+
+let getSyntaxListElementType (t:Type) =
+    if t.IsGenericType && (t.GetGenericTypeDefinition() = syntaxListType) then
+        Some (t.GetGenericArguments().[0])
+    else
+        None
 
 let (|Value|Token|Node|List|Another|) (t:Type) =
     if t.IsPrimitive || t.IsEnum || t = typeof<string> then
@@ -38,10 +51,11 @@ let (|Value|Token|Node|List|Another|) (t:Type) =
         Token t
     else if baseNodeType.IsAssignableFrom t then
         Node t
-    else if t.IsGenericType && (t.GetGenericTypeDefinition() = syntaxListType) then
-        List (t.GetGenericArguments().[0])
     else
-        Another
+        match getSyntaxListElementType t with
+        | Some et -> List et
+        | _ -> Another
+
 let (|NotVisible|_|) (m: MethodBase) =
     if (m = null) || not m.IsPublic || m.IsStatic then Some m else None
 
@@ -80,6 +94,36 @@ let getTupleArgsString (name: string) (p: PropertyInfo) =
     | Another ->
         None
 
+let getTupleArgsStringWithCast (name: string) (p: PropertyInfo) (ct: Type) =
+    match p.PropertyType with
+    | Value et
+    | Token et
+    | Node et ->
+        if p.PropertyType <> ct then
+            Some (String.Format("{0}.{1} :> {2}", name, p.Name, ct.FullName))
+        else
+            Some (String.Format("{0}.{1}", name, p.Name))
+    | List et ->
+        if p.PropertyType <> ct then
+            if ct.IsGenericType && ct.GetGenericTypeDefinition() = seqType then
+                let gt = ct.GetGenericArguments().[0]
+                Some (String.Format("{0}.{1} |> Seq.cast<{2}> |> Seq.toList", name, p.Name, gt.FullName))
+            else
+                Some (String.Format("{0}.{1} :> {2}", name, p.Name, ct.FullName))
+        else
+            Some (String.Format("{0}.{1} |> Seq.toList", name, p.Name))
+    | Another ->
+        None
+
+let getPatternName (t: Type) =
+    let name = t.Name
+    if name.EndsWith "Syntax" then
+        name.Substring(0, name.Length - 6)
+    else
+        name
+
+////////////////////////////////////////////
+
 let writeHeader (tw: TextWriter) =
     tw.WriteLine("// This is auto-generated source code by Microsoft.CodeAnalysis.ActivePatterns, DO NOT EDIT!")
     tw.WriteLine()
@@ -110,12 +154,23 @@ let generateActivePatternsForValue path (namespaceName: string) (valueTypes: Typ
 
     tw.Flush()
 
-let getPatternName (t: Type) =
-    let name = t.Name
-    if name.EndsWith "Syntax" then
-        name.Substring(0, name.Length - 6)
-    else
-        name
+////////////////////////////////////////////
+
+let rec detectCommonType t1 t2 =
+    // t1:  Microsoft.CodeAnalysis.CSharp.Syntax.QualifiedNameSyntax
+    // t2:  Microsoft.CodeAnalysis.VisualBasic.Syntax.QualifiedNameSyntax
+    // ans: Microsoft.CodeAnalysis.SyntaxNode
+
+    match getSyntaxListElementType t1, getSyntaxListElementType t2 with
+    | Some(et1), Some(et2) ->
+        seqType.MakeGenericType([| detectCommonType et1 et2 |])
+    | _ ->
+        let rec derivedTypeList (t: Type) (tl: Type list): Type list =
+            if t = objType then t :: tl
+            else derivedTypeList t.BaseType (t :: tl)
+        let t1List = derivedTypeList t1 []
+        let t2List = derivedTypeList t2 []
+        Seq.zip t1List t2List |> Seq.filter (fun (t1, t2) -> t1 = t2) |> Seq.toArray |> Seq.last |> fst
 
 let generateLooseActivePatternsForSyntax path (namespaceName: string) (syntaxTypes: Type seq) (nodeName: Type -> string) =
     use tw = File.CreateText(path)
@@ -141,15 +196,54 @@ let generateLooseActivePatternsForSyntax path (namespaceName: string) (syntaxTyp
                 // Cannot deconstruct contains unknown property types
                 && (not (ps |> Seq.exists(fun p -> match p.PropertyType with Another -> true | _ -> false))))
             |> Seq.toArray
-
         // 0 ~ [C#; VB]
         Debug.Assert(argPropertiesByTypesList.Length <= 2)
 
-        if not (Array.isEmpty argPropertiesByTypesList) then
+        let emitOnlyOne (typesList: (Type * PropertyInfo[])[]) =
+            // Generate argument expressions
+            let argStringsByTypesList =
+                typesList
+                |> Seq.map (fun (t, ps) -> t, ps |> Seq.choose (getTupleArgsString "node") |> Seq.toArray)
+                |> Seq.toArray
+
+            tw.WriteLine(
+                "  let (|{0}|_|) (node:{1}) =",
+                patternName,
+                nodeName baseNodeType)
+            tw.WriteLine("    match node with")
+
+            let t, tupleArgs = argStringsByTypesList.[0]
+            tw.WriteLine("    | :? {0} as node ->", t.FullName)
+            tw.WriteLine("      Some ({0})", String.Join(", ", tupleArgs))
+            tw.WriteLine("    | _ -> None")
+            tw.WriteLine()
+
+        let emitBothPatterns (typesList: (Type * PropertyInfo[])[]) =
+            // Generate argument expressions
+            let argStringsByTypesList =
+                typesList
+                |> Seq.map (fun (t, ps) -> t, ps |> Seq.choose (getTupleArgsString "node") |> Seq.toArray)
+                |> Seq.toArray
+
+            argStringsByTypesList |> Seq.iter(fun (t, tupleArgs) ->
+                tw.WriteLine(
+                    "  let (|{0}{1}|_|) (node:{2}) =",
+                    t.FullName.Split(".").[2],      // HACK: Index 2 is language name (CSharp, VisualBasic)
+                    patternName,
+                    nodeName baseNodeType)
+                tw.WriteLine("    match node with")
+                tw.WriteLine("    | :? {0} as node ->", t.FullName)
+                tw.WriteLine("      Some ({0})", String.Join(", ", tupleArgs))
+                tw.WriteLine("    | _ -> None")
+                tw.WriteLine())
+
+        let emitByCast (typesList: (Type * PropertyInfo[])[]) argCommonTypes =
             // Generate argument expressions
             let argStringsByTypesList =
                 argPropertiesByTypesList
-                |> Seq.map (fun (t, ps) -> t, ps |> Seq.choose (getTupleArgsString "node") |> Seq.toArray)
+                |> Seq.map (fun (t, ps) ->
+                    t,
+                    Seq.zip ps argCommonTypes |> Seq.choose (fun (p, ct) -> getTupleArgsStringWithCast "node" p ct) |> Seq.toArray)
                 |> Seq.toArray
 
             tw.WriteLine(
@@ -163,9 +257,38 @@ let generateLooseActivePatternsForSyntax path (namespaceName: string) (syntaxTyp
                 tw.WriteLine("      Some ({0})", String.Join(", ", tupleArgs)))
 
             tw.WriteLine("    | _ -> None")
-            tw.WriteLine())
+            tw.WriteLine()
+
+        match argPropertiesByTypesList.Length, argPropertiesByTypesList |> Seq.distinctBy (fun (_, ps) -> ps.Length) |> Seq.length with
+        // C# only or VB only
+        | 1, _ -> emitOnlyOne argPropertiesByTypesList
+        // both C# and VB (argument count is differ)
+        | 2, 2 -> emitBothPatterns argPropertiesByTypesList
+        // both C# and VB (argument count is equals)
+        | 2, 1 ->
+            // Calculate common types
+            let argCommonTypes =
+                Seq.zip (argPropertiesByTypesList.[0] |> snd) (argPropertiesByTypesList.[1] |> snd)
+                |> Seq.map (fun (ps1, ps2) -> detectCommonType ps1.PropertyType ps2.PropertyType)
+                |> Seq.toArray
+
+            let isCastable (t: Type) =
+                (baseNodeType.IsAssignableFrom t)
+                || (syntaxTokenType.IsAssignableFrom t)
+                || t.IsInterface
+
+            match argCommonTypes |> Seq.exists (isCastable >> not) with
+            // Argument contains not castable.
+            | true -> emitBothPatterns argPropertiesByTypesList
+            // All arguments castable.
+            | false -> emitByCast argPropertiesByTypesList argCommonTypes
+    
+        | _ ->
+            ())
 
     tw.Flush()
+
+////////////////////////////////////////////
 
 let generateStrictActivePatternsForSyntax path (namespaceName: string) (syntaxTypes: Type seq) (nodeName: Type -> string) =
     use tw = File.CreateText(path)
@@ -196,6 +319,8 @@ let generateStrictActivePatternsForSyntax path (namespaceName: string) (syntaxTy
 
     tw.Flush()
 
+////////////////////////////////////////////
+
 let getTargetPath (prefix: string) fileName =
     if prefix.Length >= 1 then
         (Path.Combine("..","..","..","..", "Microsoft.CodeAnalysis.ActivePatterns", prefix, fileName))
@@ -215,6 +340,8 @@ let rec baseAbstractType (bottomType: Type) (t: Type) =
 let getNodeName bottomType t =
     (baseAbstractType bottomType t).FullName
         
+////////////////////////////////////////////
+
 [<EntryPoint>]
 let main argv =
     let valueTypes (nodeType: Type) =

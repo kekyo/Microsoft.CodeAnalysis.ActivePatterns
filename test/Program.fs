@@ -31,7 +31,6 @@ open System.Text
 
 open Microsoft.CodeAnalysis
 open Microsoft.CodeAnalysis.CSharp
-open Microsoft.CodeAnalysis.CSharp.Syntax
 
 // This is a namespace for active pattern functions.
 // "Strict" means strongly typed args and return types.
