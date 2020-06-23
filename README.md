@@ -10,7 +10,6 @@ This library auguments for Roslyn AST (Abstract syntax tree nodes) types by F# a
 | Title | Status |
 |:----|:----|
 | NuGet | [![NuGet](https://img.shields.io/nuget/v/Microsoft.CodeAnalysis.ActivePatterns.svg?style=flat)](https://www.nuget.org/packages/Microsoft.CodeAnalysis.ActivePatterns) |
-| CI (AppVeyor) | [![AppVeyor](https://ci.appveyor.com/api/projects/status/dgbj9dchvxw0du7s?svg=true)](https://ci.appveyor.com/project/kekyo/microsoft-codeanalysis-activepatterns) |
 
 ## Code example
 
