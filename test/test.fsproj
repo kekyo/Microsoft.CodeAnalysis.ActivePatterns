@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="4.5.2" />
+    <PackageReference Update="FSharp.Core" Version="4.6.2" />
     <PackageReference Update="System.ValueTuple" Version="4.5.0" />
     <PackageReference Include="CenterCLR.RelaxVersioner" Version="1.0.10">
       <PrivateAssets>all</PrivateAssets>
