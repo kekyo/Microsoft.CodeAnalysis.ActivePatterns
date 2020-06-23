@@ -58,13 +58,12 @@ let main argv =
     match root with
     | CompilationUnit
        (_, [ UsingDirective(_, _, _, Identifier(["System";"Collections";"Generic"]), _)], _,
-         [ NamespaceDeclaration(_,
-            Identifier(["SampleNamespace"]), _, _, _,
+         [ NamespaceDeclaration(_, Token("SampleNamespace"), _, _, _,
             [ ClassDeclaration(decl,
                 _, Text("SampleClass"), _, _, _, _,
                 memberDecls,
                 _, _)],
-            _, _) ],
+            _, _, _) ],
          _) ->
             memberDecls
             |> Seq.choose (function

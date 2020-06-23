@@ -195,6 +195,8 @@ let main argv =
 * Add additional custom functions.
 
 ## History
+* 0.8.20:
+  * Fixed NamespaceDeclaration matcher.
 * 0.8.10:
   * Upgraded Roslyn to 3.6.0.
 * 0.8.1:

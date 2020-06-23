@@ -35,3 +35,6 @@ module Additionals =
         | _ ->
             None
     matcher node
+
+  let (|Token|_|) (node:SyntaxToken) : string option =
+    Some node.Text
