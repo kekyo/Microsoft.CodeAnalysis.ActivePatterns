@@ -12,7 +12,7 @@ module ActivePatterns =
     CommandLineReference (value.Reference)
 
   let (|CommandLineSourceFile|) (value:Microsoft.CodeAnalysis.CommandLineSourceFile) =
-    CommandLineSourceFile (value.Path, value.IsScript)
+    CommandLineSourceFile (value.Path, value.IsInputRedirected, value.IsScript)
 
   let (|PreprocessingSymbolInfo|) (value:Microsoft.CodeAnalysis.PreprocessingSymbolInfo) =
     PreprocessingSymbolInfo (value.IsDefined)
@@ -29,8 +29,14 @@ module ActivePatterns =
   let (|MetadataReferenceProperties|) (value:Microsoft.CodeAnalysis.MetadataReferenceProperties) =
     MetadataReferenceProperties (value.Kind, value.EmbedInteropTypes)
 
+  let (|GeneratedSourceText|) (value:Microsoft.CodeAnalysis.GeneratedSourceText) =
+    GeneratedSourceText (value.HintName)
+
   let (|SymbolDisplayPart|) (value:Microsoft.CodeAnalysis.SymbolDisplayPart) =
     SymbolDisplayPart (value.Kind)
+
+  let (|NullabilityInfo|) (value:Microsoft.CodeAnalysis.NullabilityInfo) =
+    NullabilityInfo (value.Annotation, value.FlowState)
 
   let (|TypedConstant|) (value:Microsoft.CodeAnalysis.TypedConstant) =
     TypedConstant (value.Kind, value.IsNull)
@@ -78,7 +84,7 @@ module ActivePatterns =
     SyntaxNodeAnalysisContext (value.Node)
 
   let (|CommonConversion|) (value:Microsoft.CodeAnalysis.Operations.CommonConversion) =
-    CommonConversion (value.Exists, value.IsIdentity, value.IsNumeric, value.IsReference, value.IsUserDefined)
+    CommonConversion (value.Exists, value.IsIdentity, value.IsNumeric, value.IsReference, value.IsImplicit, value.IsUserDefined)
 
   let (|SemanticEdit|) (value:Microsoft.CodeAnalysis.Emit.SemanticEdit) =
     SemanticEdit (value.Kind, value.PreserveLocalVariables)

@@ -15,4 +15,4 @@ rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 rem See the License for the specific language governing permissions and
 rem limitations under the License.
 
-dotnet pack --configuration Release --output .. Microsoft.CodeAnalysis.ActivePatterns
+dotnet pack --configuration Release --output artifacts Microsoft.CodeAnalysis.ActivePatterns
