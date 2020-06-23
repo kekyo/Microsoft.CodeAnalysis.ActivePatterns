@@ -196,6 +196,8 @@ let main argv =
 * Add additional custom functions.
 
 ## History
+* 0.8.10:
+  * Upgraded Roslyn to 3.6.0.
 * 0.8.1:
   * More shorter SyntaxNode related names (ex: CompilationUnitSyntax --> CompilationUnit).
   * Support strict and loose active patterns.
