@@ -179,22 +179,32 @@ let main argv =
 ```
 
 ## Platform
-* .NET Standard 1.6/2.0, .NET Core 2.0 and .NET Framework 4.6
-* Roslyn 2 (based 2.8.2).
+
+* .NET 7, 6, 5
+* .NET Standard 2.1, 2.0
+* .NET Core 3.1
+* .NET Framework 4.8, 4.6.1
+* Roslyn (based 4.4.0).
 
 ## Additional resources
+
 * ["You will be assimilated. Resistance is futile." - NGK2016B conference (12.17.2016) session slide.](http://www.slideshare.net/kekyo/documents-you-will-be-assimilated-resistance-is-futile)
   * This is a joke session ;)
 
 ## License
-* Source code copyright (c) 2016-2018 Kouji Matsui
-  * Under Apache v2 http://www.apache.org/licenses/LICENSE-2.0
+
+* Copyright (c) Kouji Matsui
+* Under Apache v2 http://www.apache.org/licenses/LICENSE-2.0
 
 ## TODO:
+
 * Improvement auto generator for better output.
 * Add additional custom functions.
 
 ## History
+
+* 0.9.0:
+  * Updated for using Roslyn 4.4.0 and .NET 7 SDK.
 * 0.8.20:
   * Fixed NamespaceDeclaration matcher.
 * 0.8.10:
