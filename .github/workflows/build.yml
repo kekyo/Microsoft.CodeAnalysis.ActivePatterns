@@ -1,0 +1,60 @@
+name: .NET
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+    #-----------------------------------------------------------------------
+    # Checkout
+
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    #   lfs: true
+    #- name: Checkout LFS objects
+    #  run: git lfs checkout
+
+    - name: Extract branch name
+      id: extract_branch_name
+    #  if: startsWith( github.ref, 'refs/tags/' )
+      run: |
+        $branch_name=$(git name-rev --name-only --exclude=tags/* HEAD)
+        echo "Detected current branch: ${branch_name}"
+        echo "branch_name=${branch_name}" >> $GITHUB_OUTPUT
+
+    #-----------------------------------------------------------------------
+    # Setup environments
+
+    - name: Setup .NET 3.1
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.*
+    - name: Setup .NET 5
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.*
+    - name: Setup .NET 6
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.*
+    - name: Setup .NET 7
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 7.0.*
+
+    #- name: Setup NuGet package reference
+    #  run: |
+    #    dotnet nuget add source ${{secrets.GH_LOCAL_NUGET_URL}} -n ref1 -u ${{secrets.GH_LOCAL_NUGET_USER}} -p ${{secrets.GH_LOCAL_NUGET_PASSWORD}} --store-password-in-clear-text --configfile nuget.config
+#        dotnet nuget add source ${{secrets.GH_NUGET_URL}} -n ref2 -u ${{secrets.GH_NUGET_USER}} -p ${{secrets.GH_NUGET_PASSWORD}} --store-password-in-clear-text --configfile nuget.config
+
+    #-----------------------------------------------------------------------
+    # Build
+
+    - name: Build
+      run: dotnet build -p:Configuration=Release -p:BuildIdentifier=${GITHUB_RUN_NUMBER}
+
+    - name: Build NuGet packages
+      run: dotnet pack -p:Configuration=Release -p:BuildIdentifier=${GITHUB_RUN_NUMBER} -o artifacts
