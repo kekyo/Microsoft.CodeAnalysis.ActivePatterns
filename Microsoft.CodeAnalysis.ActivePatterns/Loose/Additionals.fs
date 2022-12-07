@@ -1,7 +1,7 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 //
 // Microsoft.CodeAnalysis.ActivePatterns - F# Active pattern matching library for Roslyn
-// Copyright (c) 2016-2018 Kouji Matsui (@kozy_kekyo)
+// Copyright (c) Kouji Matsui (@kozy_kekyo, @kekyo@mastodon.cloud)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,16 +25,16 @@ open Microsoft.CodeAnalysis.CSharp
 [<AutoOpen>]
 module Additionals =
 
+  let (|Token|_|) (node:SyntaxToken) : string option =
+    Some node.Text
+
   let (|Identifier|_|) node : string list option =
     let rec matcher (node:SyntaxNode) =
         match node with
-        | IdentifierName(Text(text)) ->
+        | IdentifierName(Token(text)) ->
             Some [ text ]
         | QualifiedName(left, _, right) ->
             matcher left |> Option.bind(fun left -> matcher right |> Option.bind(fun right -> Some (List.append left right)))
         | _ ->
             None
     matcher node
-
-  let (|Token|_|) (node:SyntaxToken) : string option =
-    Some node.Text

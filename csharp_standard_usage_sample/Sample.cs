@@ -6,7 +6,7 @@ namespace SampleNamespace
     {
         public SampleClass()
         {
-            this.Value = System.DateTime.Now.Tick;
+            this.Value = System.DateTime.Now.Ticks;
         }
 
         public long Value

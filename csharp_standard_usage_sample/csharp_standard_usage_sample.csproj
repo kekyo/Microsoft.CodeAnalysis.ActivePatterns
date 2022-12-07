@@ -1,26 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <ApplicationIcon />
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <OutputType>Exe</OutputType>
-    <StartupObject />
+    <RootNamespace>csharp_standard_usage_sample</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Sample.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CenterCLR.RelaxVersioner" Version="1.0.10">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.6.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.4.0" />
   </ItemGroup>
 
 </Project>

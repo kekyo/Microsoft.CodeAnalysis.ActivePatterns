@@ -1,19 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netcoreapp3.1;net48</TargetFrameworks>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <Title>Microsoft.CodeAnalysis.ActivePatterns</Title>
-    <Description>F# Active pattern helper functions for Roslyn C#/Visual Basic AST.</Description>
-    <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/kekyo/Microsoft.CodeAnalysis.ActivePatterns</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/kekyo/Microsoft.CodeAnalysis.ActivePatterns</RepositoryUrl>
-    <Authors>Kouji Matsui</Authors>
-    <Copyright>Copyright (c) 2016-2018 Kouji Matsui (@kozy_kekyo)</Copyright>
-    <PackageTags>F#;FSharp;C#;CSharp;VB;Visual Basic;Roslyn;CodeAnalysis;Active Pattern</PackageTags>
+    <TargetFrameworks>net461;net48;netstandard2.0;netstandard2.1;netcoreapp3.1;net5.0;net6.0;net7.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,14 +18,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="4.7.2" />
-    <PackageReference Update="System.ValueTuple" Version="4.5.0" />
-    <PackageReference Include="CenterCLR.RelaxVersioner" Version="1.0.10">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.6.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="3.6.0" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="All" />
+    <PackageReference Update="FSharp.Core" Version="6.0.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.4.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="4.4.0" />
   </ItemGroup>
 
 </Project>

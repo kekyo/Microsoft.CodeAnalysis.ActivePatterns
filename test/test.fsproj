@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <OutputType>Exe</OutputType>
+    <RootNamespace>test</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,17 +13,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.CodeAnalysis.ActivePatterns\Microsoft.CodeAnalysis.ActivePatterns.fsproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="4.7.2" />
-    <PackageReference Update="System.ValueTuple" Version="4.5.0" />
-    <PackageReference Include="CenterCLR.RelaxVersioner" Version="1.0.10">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.6.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="3.6.0" />
   </ItemGroup>
 
 </Project>

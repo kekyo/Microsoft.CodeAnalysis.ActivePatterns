@@ -57,17 +57,17 @@ let main argv =
 
     match root with
     | CompilationUnit
-       (_, [ UsingDirective(_, _, _, Identifier(["System";"Collections";"Generic"]), _)], _,
+       (_, [ UsingDirective(_, _, _, _, Identifier(["System";"Collections";"Generic"]), _)], _,
          [ NamespaceDeclaration(_, Token("SampleNamespace"), _, _, _,
             [ ClassDeclaration(decl,
-                _, Text("SampleClass"), _, _, _, _,
+                _, Token("SampleClass"), _, _, _, _,
                 memberDecls,
                 _, _)],
             _, _, _) ],
          _) ->
             memberDecls
             |> Seq.choose (function
-              | PropertyDeclaration(_, typeSyntax, _, Text(id), _, _, _, _) ->
+              | PropertyDeclaration(_, typeSyntax, _, Token(id), _, _, _, _) ->
                  Some (typeSyntax, id)
               | _ -> None)
             |> Seq.iter (printf "%A")

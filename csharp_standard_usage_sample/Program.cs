@@ -1,7 +1,7 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 //
 // Microsoft.CodeAnalysis.ActivePatterns - F# Active pattern matching library for Roslyn
-// Copyright (c) 2016-2018 Kouji Matsui (@kozy_kekyo)
+// Copyright (c) Kouji Matsui (@kozy_kekyo, @kekyo@mastodon.cloud)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,80 +32,84 @@ using System.Text;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace csharp_standard_usage_sample
+namespace csharp_standard_usage_sample;
+
+static class Program
 {
-    static class Program
+    private static string ReadSampleCode()
     {
-        private static string ReadSampleCode()
+        using (var fs = Assembly.GetEntryAssembly()!.
+            GetManifestResourceStream("csharp_standard_usage_sample.Sample.cs"))
         {
-            using (var fs = Assembly.GetEntryAssembly().GetManifestResourceStream("csharp_standard_usage_sample.Sample.cs"))
-            {
-                var tr = new StreamReader(fs, Encoding.UTF8);
-                return tr.ReadToEnd();
-            }
+            var tr = new StreamReader(fs!, Encoding.UTF8);
+            return tr.ReadToEnd();
+        }
+    }
+
+    private static string TraverseNameSyntax(NameSyntax name)
+    {
+        if (name is IdentifierNameSyntax idName)
+        {
+            return idName.Identifier.Text;
         }
 
-        private static string TraverseNameSyntax(NameSyntax name)
+        if (name is QualifiedNameSyntax qName)
         {
-            if (name is IdentifierNameSyntax idName)
-            {
-                return idName.Identifier.Text;
-            }
-
-            if (name is QualifiedNameSyntax qName)
-            {
-                return TraverseNameSyntax(qName.Left) + "." + TraverseNameSyntax(qName.Right);
-            }
-
-            return string.Empty;
+            return TraverseNameSyntax(qName.Left) + "." + TraverseNameSyntax(qName.Right);
         }
 
-        static void Main(string[] args)
+        return string.Empty;
+    }
+
+    static void Main(string[] args)
+    {
+        var sampleCode = ReadSampleCode();
+
+        var tree = (CSharpSyntaxTree) CSharpSyntaxTree.ParseText(sampleCode);
+        var root = (CompilationUnitSyntax)tree.GetRoot();
+
+        // Too complex if we have to analyze roslyn AST using C#...
+
+        if (root.Usings.Any(u =>
         {
-            var sampleCode = ReadSampleCode();
-
-            var tree = (CSharpSyntaxTree) CSharpSyntaxTree.ParseText(sampleCode);
-            var root = (CompilationUnitSyntax)tree.GetRoot();
-
-            // Too complex if we have to analyze roslyn AST using C#...
-
-            if (root.Usings.Any(u =>
+            var name = TraverseNameSyntax(u.Name);
+            return name == "System.Collections.Generic";
+        }))
+        {
+            if (root.Members.Any(m =>
             {
-                var name = TraverseNameSyntax(u.Name);
-                return name == "System.Collections.Generic";
-            }))
-            {
-                if (root.Members.Any(m =>
+                if (m is NamespaceDeclarationSyntax nameDecl)
                 {
-                    if (m is NamespaceDeclarationSyntax nameDecl)
+                    if (nameDecl.Name is IdentifierNameSyntax name)
                     {
-                        if (nameDecl.Name is IdentifierNameSyntax name)
+                        if (name.Identifier.Text == "SampleNamespace")
                         {
-                            if (name.Identifier.Text == "SampleNamespace")
+                            if (nameDecl.Members.Any(m2 =>
                             {
-                                if (nameDecl.Members.Any(m2 =>
+                                if (m2 is ClassDeclarationSyntax classDecl)
                                 {
-                                    if (m2 is ClassDeclarationSyntax classDecl)
+                                    var name2 = classDecl.Identifier.Text;
+                                    if (name2 == "SampleClass")
                                     {
-                                        var name2 = classDecl.Identifier.Text;
-                                        if (name2 == "SampleClass")
-                                        {
-                                            return true;
-                                        }
+                                        return true;
                                     }
-                                    return false;
-                                }))
-                                {
-                                    // ...
                                 }
+                                return false;
+                            }))
+                            {
+                                // Found "SampleClass" class declaration in this namespace.
+                                // ...
+
+                                return true;
                             }
                         }
                     }
-                    return false;
-                }))
-                {
-                    // ...
                 }
+                return false;
+            }))
+            {
+                // Found "SampleClass" class declaration.
+                // ...
             }
         }
     }
