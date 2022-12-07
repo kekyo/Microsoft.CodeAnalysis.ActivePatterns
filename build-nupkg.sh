@@ -12,5 +12,5 @@ echo
 
 # git clean -xfd
 
-dotnet build -p:Configuration=Release -o artifacts
+dotnet build -p:Configuration=Release
 dotnet pack -p:Configuration=Release -o artifacts
