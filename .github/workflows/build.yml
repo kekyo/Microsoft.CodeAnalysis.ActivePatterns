@@ -21,7 +21,7 @@ jobs:
       id: extract_branch_name
     #  if: startsWith( github.ref, 'refs/tags/' )
       run: |
-        $branch_name=$(git name-rev --name-only --exclude=tags/* HEAD)
+        export branch_name=`git name-rev --name-only --exclude=tags/* HEAD`
         echo "Detected current branch: ${branch_name}"
         echo "branch_name=${branch_name}" >> $GITHUB_OUTPUT
 
